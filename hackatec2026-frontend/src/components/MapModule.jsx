@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import L from 'leaflet'
 import { getAllLocations, PLANT_CENTER } from '../services/locationService'
+import { getAllPlants } from '../services/plantasService'
 
 const REFRESH_MS = 3 * 60 * 1000  // 3 minutos
 
@@ -43,30 +44,49 @@ function buildIcon(loc) {
   })
 }
 
+function buildPlantIcon() {
+  return L.divIcon({
+    className: '',
+    iconAnchor: [16, 16],
+    html: `<div style="width:32px;height:32px;background:#041632;border:3px solid white;
+      border-radius:8px;display:flex;align-items:center;justify-content:center;
+      box-shadow:0 2px 8px rgba(0,0,0,0.4);">
+      <span style="color:white;font-size:16px;line-height:1;" class="material-symbols-outlined">factory</span>
+    </div>`,
+  })
+}
+
 export default function MapModule() {
-  const mapDivRef  = useRef(null)
-  const mapRef     = useRef(null)
-  const markersRef = useRef({})
+  const mapDivRef       = useRef(null)
+  const mapRef          = useRef(null)
+  const markersRef      = useRef({})
+  const plantMarkersRef = useRef({})
+  const plantCirclesRef = useRef({})
 
   const [locations, setLocations]   = useState({})
+  const [plants, setPlants]         = useState([])
   const [lastSync,  setLastSync]    = useState(new Date())
   const [total,     setTotal]       = useState(0)
   const [staleCount,setStaleCount]  = useState(0)
 
-const refresh = useCallback(async () => {
-  const locs = await getAllLocations()
-  setLocations(locs)
-  setLastSync(new Date())
-  setTotal(Object.keys(locs).length)
-  setStaleCount(Object.values(locs).filter(l => Date.now() - l.updatedAt > 10 * 60 * 1000).length)
-}, [])
+  const refresh = useCallback(async () => {
+    const locs = await getAllLocations()
+    setLocations(locs)
+    setLastSync(new Date())
+    setTotal(Object.keys(locs).length)
+    setStaleCount(Object.values(locs).filter(l => Date.now() - l.updatedAt > 10 * 60 * 1000).length)
+  }, [])
+
+  const loadPlants = useCallback(async () => {
+    setPlants(await getAllPlants())
+  }, [])
 
   useEffect(() => {
     if (mapRef.current || !mapDivRef.current) return
 
     const map = L.map(mapDivRef.current, {
       center:             [PLANT_CENTER.lat, PLANT_CENTER.lng],
-      zoom:               15,
+      zoom:               13,
       zoomControl:        true,
       attributionControl: true,
     })
@@ -76,25 +96,16 @@ const refresh = useCallback(async () => {
       maxZoom: 19,
     }).addTo(map)
 
-    L.marker([PLANT_CENTER.lat, PLANT_CENTER.lng], {
-      icon: L.divIcon({
-        className: '',
-        iconAnchor: [16, 16],
-        html: `<div style="width:32px;height:32px;background:#041632;border:3px solid white;
-          border-radius:8px;display:flex;align-items:center;justify-content:center;
-          box-shadow:0 2px 8px rgba(0,0,0,0.4);">
-          <span style="color:white;font-size:16px;line-height:1;" class="material-symbols-outlined">factory</span>
-        </div>`,
-      }),
-    }).addTo(map).bindPopup('<b style="font-family:Inter,sans-serif">Plant Alpha-4</b><br><small>Centro de operaciones</small>')
-
     mapRef.current = map
     refresh()
+    loadPlants()
 
     return () => {
       map.remove()
       mapRef.current  = null
       markersRef.current = {}
+      plantMarkersRef.current = {}
+      plantCirclesRef.current = {}
     }
   }, []) // eslint-disable-line
 
@@ -103,6 +114,46 @@ const refresh = useCallback(async () => {
     return () => clearInterval(id)
   }, [refresh])
 
+  // Pinta las plantas (marcador + círculo de radio) cuando llegan del backend
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || plants.length === 0) return
+
+    Object.values(plantMarkersRef.current).forEach((m) => m.remove())
+    Object.values(plantCirclesRef.current).forEach((c) => c.remove())
+    plantMarkersRef.current = {}
+    plantCirclesRef.current = {}
+
+    const bounds = []
+
+    plants.forEach((plant) => {
+      const marker = L.marker([plant.lat, plant.lng], { icon: buildPlantIcon() })
+        .addTo(map)
+        .bindPopup(`
+          <div style="font-family:Inter,sans-serif">
+            <b style="color:#041632">${plant.nombre}</b><br>
+            <small style="color:#75777e">${plant.ubicacion || 'Centro de operaciones'}</small>
+          </div>
+        `)
+      plantMarkersRef.current[plant.id_planta] = marker
+
+      const circle = L.circle([plant.lat, plant.lng], {
+        radius: plant.radio_metros || 100,
+        color: '#041632',
+        weight: 1,
+        fillColor: '#041632',
+        fillOpacity: 0.06,
+      }).addTo(map)
+      plantCirclesRef.current[plant.id_planta] = circle
+
+      bounds.push([plant.lat, plant.lng])
+    })
+
+    if (bounds.length > 1) map.fitBounds(bounds, { padding: [40, 40] })
+    else if (bounds.length === 1) map.setView(bounds[0], 15)
+  }, [plants])
+
+  // Pinta los empleados (locations) — sin cambios respecto a antes
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
@@ -183,7 +234,7 @@ const refresh = useCallback(async () => {
 
         <div className="absolute bottom-sm right-sm bg-white/90 border border-outline-variant px-sm py-xs rounded-full text-label-md text-on-surface-variant z-[1000] flex items-center gap-xs">
           <span className="material-symbols-outlined text-[12px]">schedule</span>
-          Actualiza cada 3 min · {total} empleados
+          Actualiza cada 3 min · {total} empleados · {plants.length} plantas
         </div>
       </div>
 
