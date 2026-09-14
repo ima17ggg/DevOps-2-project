@@ -1,4 +1,22 @@
+import React from 'react';
+import { exportToExcel, exportToPDF } from '../services/exportHelpers';
 export default function Reports() {
+    const [incidents] = React.useState([
+        { id: 'INC-8942', dateTime: '2023-10-27 14:32', location: 'Zone C - Assembly', type: 'Equipment Failure', status: 'Critical' },
+        { id: 'INC-8941', dateTime: '2023-10-27 10:15', location: 'Loading Bay 2', type: 'Safety Violation', status: 'Pending' },
+        { id: 'INC-8940', dateTime: '2023-10-26 16:45', location: 'Chemical Storage', type: 'Spill Containment', status: 'Resolved' },
+        { id: 'INC-8939', dateTime: '2023-10-26 09:10', location: 'Perimeter Fence North', type: 'Security Breach', status: 'Resolved' },
+    ]);
+
+    // Función que ejecutará los helpers
+    const handleExport = (format) => {
+        const fileName = `Reporte_Incidentes_${new Date().toISOString().slice(0, 10)}`;
+        if (format === 'excel') {
+            exportToExcel(incidents, fileName);
+        } else if (format === 'pdf') {
+            exportToPDF(incidents, fileName, 'Reporte de Incidentes');
+        }
+    };
     return (
         <main className="flex-1 overflow-y-auto p-gutter md:p-lg space-y-lg">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-md mb-md">
@@ -109,6 +127,7 @@ export default function Reports() {
                                     <span className="material-symbols-outlined text-[18px]">filter_list</span>
                                 </button>
                                 <button
+                                    onClick={() => handleExport('excel')}
                                     className="p-xs text-outline hover:text-primary border border-transparent hover:border-outline-variant rounded transition-all"
                                     title="Export"
                                 >
@@ -279,16 +298,22 @@ export default function Reports() {
                                 </div>
                             </div>
                             <div className="flex gap-sm mt-auto pt-sm border-t border-outline-variant">
-                                <button className="flex-1 bg-surface-container text-primary border border-outline-variant font-label-md text-label-md py-xs rounded hover:bg-surface-container-high transition-colors flex items-center justify-center gap-xs">
+                                <button
+                                    onClick={() => handleExport('pdf')}
+                                    className="flex-1 bg-surface-container text-primary border border-outline-variant font-label-md text-label-md py-xs rounded hover:bg-surface-container-high transition-colors flex items-center justify-center gap-xs">
                                     <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
                                     PDF
                                 </button>
-                                <button className="flex-1 bg-surface-container text-primary border border-outline-variant font-label-md text-label-md py-xs rounded hover:bg-surface-container-high transition-colors flex items-center justify-center gap-xs">
+                                <button 
+                                    onClick={() => handleExport('excel')}
+                                    className="flex-1 bg-surface-container text-primary border border-outline-variant font-label-md text-label-md py-xs rounded hover:bg-surface-container-high transition-colors flex items-center justify-center gap-xs">
                                     <span className="material-symbols-outlined text-[16px]">grid_on</span>
                                     Excel
                                 </button>
                             </div>
-                            <button className="w-full mt-sm bg-primary text-on-primary font-label-md text-label-md py-sm rounded hover:opacity-90 transition-opacity flex items-center justify-center gap-xs shadow-sm">
+                            <button 
+                                onClick={() => handleExport('pdf')}
+                                className="w-full mt-sm bg-primary text-on-primary font-label-md text-label-md py-sm rounded hover:opacity-90 transition-opacity flex items-center justify-center gap-xs shadow-sm">
                                 <span className="material-symbols-outlined text-[18px]">play_arrow</span>
                                 Generate Report
                             </button>
