@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { useEffect, useState } from 'react'
-=======
 import { useEffect, useRef, useState } from 'react'
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
 
 const STATUS_COLORS = {
     'On Shift': 'bg-green-500',
@@ -10,8 +6,6 @@ const STATUS_COLORS = {
     'Pending Clearance': 'bg-orange-500',
 }
 
-<<<<<<< HEAD
-=======
 const EMPTY_FORM = {
     nombre: '',
     apellido_paterno: '',
@@ -23,26 +17,11 @@ const EMPTY_FORM = {
     id_planta_destino: '',
 }
 
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
 export default function Employees() {
     const [employees, setEmployees] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
-<<<<<<< HEAD
-     useEffect(() => {
-        fetch('/api/empleados') // ajusta si tu Express monta esta ruta con otro prefijo
-            .then((res) => {
-                if (!res.ok) throw new Error('No se pudo cargar la lista de empleados')
-                return res.json()
-                })
-                .then((json) => setEmployees(Array.isArray(json) ? json : json.data))
-                .catch((err) => setError(err.message))
-                .finally(() => setLoading(false))
-        }, [])
-
-     return (
-=======
     // Add Employee modal state
     const [showAddModal, setShowAddModal] = useState(false)
     const [form, setForm] = useState(EMPTY_FORM)
@@ -231,7 +210,6 @@ export default function Employees() {
     })
 
     return (
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
         <main className="flex-grow p-lg flex flex-col gap-lg">
             {/* Page Header */}
             <div className="flex items-center justify-between">
@@ -250,9 +228,6 @@ export default function Employees() {
                         Export Roster
                     </button>
 
-<<<<<<< HEAD
-                    <button className="h-12 px-5 rounded-xl bg-[#fc820c] hover:bg-[#e97808] transition-colors text-white font-semibold">
-=======
                     <button
                         onClick={() => fileInputRef.current?.click()}
                         disabled={importing}
@@ -273,14 +248,11 @@ export default function Employees() {
                         onClick={() => setShowAddModal(true)}
                         className="h-12 px-5 rounded-xl bg-[#fc820c] hover:bg-[#e97808] transition-colors text-white font-semibold"
                     >
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                         Add Employee
                     </button>
                 </div>
             </div>
 
-<<<<<<< HEAD
-=======
             {/* Import feedback */}
             {importSummary && (
                 <div className="rounded-2xl border border-[#e0e3e5] bg-[#f7f9fb] px-5 py-4 text-sm text-[#041632]">
@@ -309,7 +281,6 @@ export default function Employees() {
                 </div>
             )}
 
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <KpiCard title="Total Employees" value={loading ? '—' : String(employees.length)} />
@@ -329,11 +300,8 @@ export default function Employees() {
                     <input
                         type="text"
                         placeholder="Search employee..."
-<<<<<<< HEAD
-=======
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                         className="w-72 h-11 rounded-xl border border-[#c5c6ce] bg-[#f7f9fb] px-4 outline-none focus:border-[#041632]"
                     />
                 </div>
@@ -369,11 +337,6 @@ export default function Employees() {
                                 </tr>
                             )}
 
-<<<<<<< HEAD
-                            {!loading && !error && employees.map((employee, index) => (
-                                <tr
-                                    key={employee.id}
-=======
                             {!loading && !error && filteredEmployees.length === 0 && (
                                 <tr>
                                     <td colSpan={7} className="px-6 py-8 text-center text-[#75777e]">
@@ -385,39 +348,26 @@ export default function Employees() {
                             {!loading && !error && filteredEmployees.map((employee, index) => (
                                 <tr
                                     key={employee.id ?? employee.id_empleado}
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
-                                    className={`border-b border-[#eceef0] hover:bg-[#d7e2ff]/30 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-[#f8fafc]'
-                                        }`}
+                                    className={`border-b border-[#eceef0] hover:bg-[#d7e2ff]/30 transition-colors ${
+                                        index % 2 === 0 ? 'bg-white' : 'bg-[#f8fafc]'
+                                    }`}
                                 >
                                     <TableCell>
                                         <div>
                                             <p className="font-semibold text-[#191c1e]">
-<<<<<<< HEAD
-                                                {employee.name}
-=======
                                                 {employee.name ?? `${employee.nombre ?? ''} ${employee.apellido_paterno ?? ''}`.trim()}
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                                             </p>
                                         </div>
                                     </TableCell>
 
                                     <TableCell>
                                         <span className="font-mono text-[#75777e]">
-<<<<<<< HEAD
-                                            {employee.id}
-                                        </span>
-                                    </TableCell>
-
-                                    <TableCell>{employee.role}</TableCell>
-                                    <TableCell>{employee.plant}</TableCell>
-=======
                                             {employee.id ?? employee.id_empleado}
                                         </span>
                                     </TableCell>
 
                                     <TableCell>{employee.role ?? employee.id_rol}</TableCell>
                                     <TableCell>{employee.plant ?? employee.id_planta_destino}</TableCell>
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
 
                                     <TableCell>
                                         <div className="flex items-center gap-2">
@@ -426,11 +376,7 @@ export default function Employees() {
                                             />
 
                                             <span className="font-semibold text-sm">
-<<<<<<< HEAD
-                                                {employee.status}
-=======
                                                 {employee.status ?? '—'}
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                                             </span>
                                         </div>
                                     </TableCell>
@@ -458,8 +404,6 @@ export default function Employees() {
                     </table>
                 </div>
             </div>
-<<<<<<< HEAD
-=======
 
             {/* Add Employee Modal */}
             {showAddModal && (
@@ -520,7 +464,6 @@ export default function Employees() {
                     </div>
                 </div>
             )}
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
         </main>
     );
 }
@@ -554,8 +497,6 @@ function TableCell({ children, align = 'left' }) {
         </td>
     );
 }
-<<<<<<< HEAD
-=======
 
 function Field({ label, name, value, onChange, type = 'text', required = false, maxLength }) {
     return (
@@ -598,4 +539,3 @@ function SelectField({ label, name, value, onChange, options, placeholder, label
         </label>
     );
 }
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10

@@ -6,16 +6,12 @@ import { authenticateJWT } from '../middleware/auth.js';
 import { validateRequired, successResponse } from '../utils/validation.js';
 
 const router = express.Router();
-<<<<<<< HEAD
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-=======
 
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET no está definida. Configúrala en las variables de entorno antes de arrancar el servidor.');
 }
 const JWT_SECRET = process.env.JWT_SECRET;
 
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
 const AUTH_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
@@ -65,11 +61,7 @@ router.post('/login', asyncHandler(async (req, res) => {
     });
   }
 
-<<<<<<< HEAD
-  // Comparar password con hash
-=======
   // Comparar password en texto plano (pendiente: migrar a hash con bcrypt)
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
   const passwordMatch = password === (user.Password ?? '');
 
   if (!passwordMatch) {
