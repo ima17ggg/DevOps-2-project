@@ -20,10 +20,7 @@ import qrRouter from './routes/qr.js';
 import gpsRouter from './routes/gps.js';
 import excelRouter from './routes/excel.js';
 import dashboardRouter from './routes/dashboard.js';
-<<<<<<< HEAD
-=======
 import rolesRouter from './routes/roles.js';
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -53,10 +50,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/usuarios', authenticateJWT, usuariosRouter);
 app.use('/api/empleados', authenticateJWT, empleadosRouter);
 app.use('/api/asignaciones', authenticateJWT, asignacionesRouter);
-<<<<<<< HEAD
-=======
 app.use('/api/roles', authenticateJWT, rolesRouter);
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
 app.use('/api/plantas', authenticateJWT, plantasRouter);
 app.use('/api/asistencias', authenticateJWT, asistenciasRouter);
 app.use('/api/actividades', authenticateJWT, actividadesRouter);

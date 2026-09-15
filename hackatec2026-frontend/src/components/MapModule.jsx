@@ -39,7 +39,7 @@ function buildIcon(loc) {
         ${pulse}
         <span style="width:9px;height:9px;border-radius:50%;background:${color};
           flex-shrink:0;display:inline-block;"></span>
-        ${loc.name}
+        ${loc.name || 'Sin nombre'}
       </div>`,
   })
 }
@@ -70,22 +70,38 @@ export default function MapModule() {
   const [staleCount,setStaleCount]  = useState(0)
 
   const refresh = useCallback(async () => {
-    const locs = await getAllLocations()
-    setLocations(locs)
-    setLastSync(new Date())
-    setTotal(Object.keys(locs).length)
-    setStaleCount(Object.values(locs).filter(l => Date.now() - l.updatedAt > 10 * 60 * 1000).length)
+    try {
+      const locs = await getAllLocations()
+      if (locs && typeof locs === 'object') {
+        setLocations(locs)
+        setLastSync(new Date())
+        setTotal(Object.keys(locs).length)
+        setStaleCount(Object.values(locs).filter(l => l && Date.now() - (l.updatedAt || 0) > 10 * 60 * 1000).length)
+      }
+    } catch (err) {
+      console.error('Error fetching locations:', err)
+    }
   }, [])
 
   const loadPlants = useCallback(async () => {
-    setPlants(await getAllPlants())
+    try {
+      const p = await getAllPlants()
+      if (Array.isArray(p)) {
+        setPlants(p)
+      }
+    } catch (err) {
+      console.error('Error fetching plants:', err)
+    }
   }, [])
 
   useEffect(() => {
     if (mapRef.current || !mapDivRef.current) return
 
+    const defaultLat = PLANT_CENTER?.lat || 25.4232
+    const defaultLng = PLANT_CENTER?.lng || -101.0053
+
     const map = L.map(mapDivRef.current, {
-      center:              [PLANT_CENTER.lat, PLANT_CENTER.lng],
+      center:              [defaultLat, defaultLng],
       zoom:                13,
       zoomControl:         true,
       attributionControl: true,
@@ -114,10 +130,10 @@ export default function MapModule() {
     return () => clearInterval(id)
   }, [refresh])
 
-  // Pinta las plantas (marcador + círculo de radio) cuando llegan del backend
+  // Pinta las plantas de forma segura validando coordenadas
   useEffect(() => {
     const map = mapRef.current
-    if (!map || plants.length === 0) return
+    if (!map || !plants.length) return
 
     Object.values(plantMarkersRef.current).forEach((m) => m.remove())
     Object.values(plantCirclesRef.current).forEach((c) => c.remove())
@@ -127,11 +143,13 @@ export default function MapModule() {
     const bounds = []
 
     plants.forEach((plant) => {
+      if (!plant || typeof plant.lat !== 'number' || typeof plant.lng !== 'number') return
+
       const marker = L.marker([plant.lat, plant.lng], { icon: buildPlantIcon() })
         .addTo(map)
         .bindPopup(`
           <div style="font-family:Inter,sans-serif">
-            <b style="color:#041632">${plant.nombre}</b><br>
+            <b style="color:#041632">${plant.nombre || 'Planta'}</b><br>
             <small style="color:#75777e">${plant.ubicacion || 'Centro de operaciones'}</small>
           </div>
         `)
@@ -153,24 +171,26 @@ export default function MapModule() {
     else if (bounds.length === 1) map.setView(bounds[0], 15)
   }, [plants])
 
-  // Pinta los empleados (locations)
+  // Pinta los empleados (locations) validando coordenadas
   useEffect(() => {
     const map = mapRef.current
-    if (!map) return
+    if (!map || !locations) return
 
     Object.values(markersRef.current).forEach((m) => m.remove())
     markersRef.current = {}
 
     Object.entries(locations).forEach(([id, loc]) => {
-      const stale    = Date.now() - loc.updatedAt > 10 * 60 * 1000
-      const timeAgo  = formatTimeAgo(loc.updatedAt)
+      if (!loc || typeof loc.lat !== 'number' || typeof loc.lng !== 'number') return
+
+      const stale   = Date.now() - (loc.updatedAt || 0) > 10 * 60 * 1000
+      const timeAgo  = formatTimeAgo(loc.updatedAt || Date.now())
       const color    = stale ? '#75777e' : roleColor(loc.role)
 
       const marker = L.marker([loc.lat, loc.lng], { icon: buildIcon(loc) })
         .addTo(map)
         .bindPopup(`
           <div style="font-family:Inter,sans-serif;min-width:170px;">
-            <p style="margin:0 0 3px;font-weight:700;color:#041632;font-size:13px">${loc.name}</p>
+            <p style="margin:0 0 3px;font-weight:700;color:#041632;font-size:13px">${loc.name || 'Sin nombre'}</p>
             <p style="margin:0 0 6px;color:#75777e;font-size:11px">${loc.role || 'Empleado'}</p>
             <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
               <span style="width:7px;height:7px;border-radius:50%;background:${color};display:inline-block"></span>
