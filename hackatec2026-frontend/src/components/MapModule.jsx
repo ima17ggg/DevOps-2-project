@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import L from 'leaflet'
 import { getAllLocations, PLANT_CENTER } from '../services/locationService'
-<<<<<<< HEAD
-=======
 import { getAllPlants } from '../services/plantasService'
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
 
 const REFRESH_MS = 3 * 60 * 1000  // 3 minutos
 
@@ -35,11 +32,7 @@ function buildIcon(loc) {
     iconAnchor: [0, 14],
     popupAnchor: [70, -8],
     html: `
-<<<<<<< HEAD
-      <div class="notranslate" translate="no" style="position:relative;display:inline-flex;align-items:center;gap:6px;
-=======
       <div style="position:relative;display:inline-flex;align-items:center;gap:6px;
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
         background:white;border:2px solid ${color};border-radius:20px;
         padding:4px 10px 4px 6px;font-size:11px;font-weight:700;color:#041632;
         white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,0.18);cursor:pointer;">
@@ -51,14 +44,6 @@ function buildIcon(loc) {
   })
 }
 
-<<<<<<< HEAD
-export default function MapModule() {
-  const mapDivRef  = useRef(null)
-  const mapRef     = useRef(null)
-  const markersRef = useRef({})
-
-  const [locations, setLocations]   = useState({})
-=======
 function buildPlantIcon() {
   return L.divIcon({
     className: '',
@@ -80,42 +65,29 @@ export default function MapModule() {
 
   const [locations, setLocations]   = useState({})
   const [plants, setPlants]         = useState([])
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
   const [lastSync,  setLastSync]    = useState(new Date())
   const [total,     setTotal]       = useState(0)
   const [staleCount,setStaleCount]  = useState(0)
 
-<<<<<<< HEAD
-  const refresh = useCallback(() => {
-    const locs = getAllLocations()
-=======
   const refresh = useCallback(async () => {
     const locs = await getAllLocations()
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
     setLocations(locs)
     setLastSync(new Date())
     setTotal(Object.keys(locs).length)
     setStaleCount(Object.values(locs).filter(l => Date.now() - l.updatedAt > 10 * 60 * 1000).length)
   }, [])
 
-<<<<<<< HEAD
-=======
   const loadPlants = useCallback(async () => {
     setPlants(await getAllPlants())
   }, [])
 
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
   useEffect(() => {
     if (mapRef.current || !mapDivRef.current) return
 
     const map = L.map(mapDivRef.current, {
-      center:             [PLANT_CENTER.lat, PLANT_CENTER.lng],
-<<<<<<< HEAD
-      zoom:               15,
-=======
-      zoom:               13,
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
-      zoomControl:        true,
+      center:              [PLANT_CENTER.lat, PLANT_CENTER.lng],
+      zoom:                13,
+      zoomControl:         true,
       attributionControl: true,
     })
 
@@ -124,47 +96,24 @@ export default function MapModule() {
       maxZoom: 19,
     }).addTo(map)
 
-<<<<<<< HEAD
-    /* Pin Central con Unicode de Icono Factory */
-    L.marker([PLANT_CENTER.lat, PLANT_CENTER.lng], {
-      icon: L.divIcon({
-        className: '',
-        iconAnchor: [16, 16],
-        html: `<div style="width:32px;height:32px;background:#041632;border:3px solid white;
-          border-radius:8px;display:flex;align-items:center;justify-content:center;
-          box-shadow:0 2px 8px rgba(0,0,0,0.4);">
-          <span style="color:white;font-size:16px;line-height:1;" class="material-symbols-outlined notranslate" translate="no">&#xE0EF;</span>
-        </div>`,
-      }),
-    }).addTo(map).bindPopup('<b style="font-family:Inter,sans-serif">Plant Alpha-4</b><br><small>Centro de operaciones</small>')
-
-    mapRef.current = map
-    refresh()
-=======
     mapRef.current = map
     refresh()
     loadPlants()
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
 
     return () => {
       map.remove()
       mapRef.current  = null
       markersRef.current = {}
-<<<<<<< HEAD
-=======
       plantMarkersRef.current = {}
       plantCirclesRef.current = {}
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
     }
-  }, []) // eslint-disable-line
+  }, [refresh, loadPlants])
 
   useEffect(() => {
     const id = setInterval(refresh, REFRESH_MS)
     return () => clearInterval(id)
   }, [refresh])
 
-<<<<<<< HEAD
-=======
   // Pinta las plantas (marcador + círculo de radio) cuando llegan del backend
   useEffect(() => {
     const map = mapRef.current
@@ -204,8 +153,7 @@ export default function MapModule() {
     else if (bounds.length === 1) map.setView(bounds[0], 15)
   }, [plants])
 
-  // Pinta los empleados (locations) — sin cambios respecto a antes
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
+  // Pinta los empleados (locations)
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
@@ -255,34 +203,18 @@ export default function MapModule() {
         <div className="flex gap-sm">
           <button
             onClick={refresh}
-<<<<<<< HEAD
             className="text-label-md font-label-md px-md py-xs bg-surface-container-lowest border border-outline-variant rounded-full text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-xs shadow-sm cursor-pointer"
           >
-            <span className="material-symbols-outlined notranslate text-[14px]" translate="no">
-              {'\uE5D5'} {/* refresh */}
-            </span>
-=======
-            className="text-label-md font-label-md px-md py-xs bg-surface-container-lowest border border-outline-variant rounded-full text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-xs shadow-sm"
-          >
             <span className="material-symbols-outlined text-[14px]">refresh</span>
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
             Refresh
           </button>
         </div>
       </div>
 
-<<<<<<< HEAD
-      <div className="flex-1 relative overflow-hidden rounded-b-xl z-0">
-        <div ref={mapDivRef} style={{ width: '100%', height: '100%' }} />
-
-        {/* Tarjeta flotante leyenda con z-10 para no competir con el Header (z-50) */}
-        <div className="absolute top-md left-md bg-white/95 backdrop-blur-sm border border-outline-variant p-sm rounded-lg shadow-sm z-[10]">
-=======
       <div className="flex-1 relative overflow-hidden rounded-b-xl">
         <div ref={mapDivRef} style={{ width: '100%', height: '100%' }} />
 
         <div className="absolute top-md left-md bg-white/95 backdrop-blur-sm border border-outline-variant p-sm rounded-lg shadow-sm z-[1000]">
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
           <p className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-xs">
             Empleados en planta
           </p>
@@ -300,17 +232,9 @@ export default function MapModule() {
           </div>
         </div>
 
-<<<<<<< HEAD
-        <div className="absolute bottom-sm right-sm bg-white/90 border border-outline-variant px-sm py-xs rounded-full text-label-md text-on-surface-variant z-[10] flex items-center gap-xs">
-          <span className="material-symbols-outlined notranslate text-[12px]" translate="no">
-            {'\uE8B5'} {/* schedule */}
-          </span>
-          Actualiza cada 3 min · {total} empleados
-=======
         <div className="absolute bottom-sm right-sm bg-white/90 border border-outline-variant px-sm py-xs rounded-full text-label-md text-on-surface-variant z-[1000] flex items-center gap-xs">
           <span className="material-symbols-outlined text-[12px]">schedule</span>
           Actualiza cada 3 min · {total} empleados · {plants.length} plantas
->>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
         </div>
       </div>
 
