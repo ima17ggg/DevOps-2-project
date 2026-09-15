@@ -89,7 +89,11 @@ export default function NotificationSettings() {
 
   // ── Prueba ───────────────────────────────────────────────────────────────
   async function handleTest() {
+<<<<<<< HEAD
     handleSave()
+=======
+    handleSave()   // guarda primero para que sendTestEmail use los datos actuales
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
     setTestStatus('sending')
     setTestError('')
     try {
@@ -112,6 +116,10 @@ export default function NotificationSettings() {
 
   const isConfigured = serviceId && templateId && publicKey && hrEmails.length > 0
 
+<<<<<<< HEAD
+=======
+  // ────────────────────────────────────────────────────────────────────────
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
   return (
     <div className="min-h-screen bg-[#f7f9fb] flex flex-col">
 
@@ -122,12 +130,20 @@ export default function NotificationSettings() {
             onClick={() => navigate('/dashboard')}
             className="flex items-center gap-1.5 text-[#041632] text-[13px] font-semibold hover:text-[#964900] transition-colors cursor-pointer"
           >
+<<<<<<< HEAD
             <span translate="no" className="material-symbols-outlined notranslate text-[18px]">arrow_back</span>
+=======
+            <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
             Dashboard
           </button>
           <div className="h-5 w-px bg-[#e0e3e5]" />
           <div className="flex items-center gap-2">
+<<<<<<< HEAD
             <span translate="no" className="material-symbols-outlined notranslate text-[#964900] text-[20px]">notifications</span>
+=======
+            <span className="material-symbols-outlined text-[#964900] text-[20px]">notifications</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
             <div>
               <p className="text-[#041632] text-[13px] font-bold leading-none">Notificaciones por correo</p>
               <p className="text-[#75777e] text-[11px] mt-0.5">Configura alertas automáticas para RH</p>
@@ -139,7 +155,11 @@ export default function NotificationSettings() {
         <div className="flex items-center gap-2.5">
           {saveStatus === 'saved' && (
             <span className="flex items-center gap-1.5 text-[#15803d] text-[12px] font-semibold animate-in fade-in">
+<<<<<<< HEAD
               <span translate="no" className="material-symbols-outlined notranslate text-[16px]"
+=======
+              <span className="material-symbols-outlined text-[16px]"
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                 style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
               Configuración guardada
             </span>
@@ -148,7 +168,11 @@ export default function NotificationSettings() {
             onClick={handleSave}
             className="flex items-center gap-1.5 text-[13px] font-bold px-4 py-1.5 bg-[#041632] hover:bg-[#1b2b48] text-white rounded-lg transition-colors cursor-pointer shadow-sm"
           >
+<<<<<<< HEAD
             <span translate="no" className="material-symbols-outlined notranslate text-[15px]">save</span>
+=======
+            <span className="material-symbols-outlined text-[15px]">save</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
             Guardar
           </button>
         </div>
@@ -164,8 +188,12 @@ export default function NotificationSettings() {
             : 'bg-[#fffbeb] border-[#fde68a]'
         }`}>
           <span
+<<<<<<< HEAD
             translate="no"
             className={`material-symbols-outlined notranslate text-[22px] ${isConfigured ? 'text-[#15803d]' : 'text-[#92400e]'}`}
+=======
+            className={`material-symbols-outlined text-[22px] ${isConfigured ? 'text-[#15803d]' : 'text-[#92400e]'}`}
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
             style={{ fontVariationSettings: "'FILL' 1" }}
           >
             {isConfigured ? 'check_circle' : 'warning'}
@@ -230,14 +258,23 @@ export default function NotificationSettings() {
                   key={email}
                   className="flex items-center gap-1.5 bg-[#041632]/[0.07] border border-[#041632]/20 text-[#041632] text-[12px] font-semibold px-3 py-1.5 rounded-full"
                 >
+<<<<<<< HEAD
                   <span translate="no" className="material-symbols-outlined notranslate text-[13px]">alternate_email</span>
                   <span translate="no" className="notranslate">{email}</span>
+=======
+                  <span className="material-symbols-outlined text-[13px]">alternate_email</span>
+                  {email}
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                   <button
                     onClick={() => removeEmail(email)}
                     className="ml-0.5 hover:text-[#b91c1c] transition-colors cursor-pointer"
                     aria-label={`Eliminar ${email}`}
                   >
+<<<<<<< HEAD
                     <span translate="no" className="material-symbols-outlined notranslate text-[14px]">close</span>
+=======
+                    <span className="material-symbols-outlined text-[14px]">close</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                   </button>
                 </span>
               ))}
@@ -247,7 +284,11 @@ export default function NotificationSettings() {
           {/* Agregar nuevo correo */}
           <div className="flex gap-2">
             <div className="flex-1 relative">
+<<<<<<< HEAD
               <span translate="no" className="material-symbols-outlined notranslate absolute left-3 top-1/2 -translate-y-1/2 text-[#75777e] text-[17px]">
+=======
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#75777e] text-[17px]">
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                 mail
               </span>
               <input
@@ -265,7 +306,11 @@ export default function NotificationSettings() {
               disabled={!newEmail.trim() || !newEmail.includes('@')}
               className="h-10 px-4 bg-[#041632] hover:bg-[#1b2b48] disabled:bg-[#c5c6ce] disabled:cursor-not-allowed text-white text-[13px] font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
             >
+<<<<<<< HEAD
               <span translate="no" className="material-symbols-outlined notranslate text-[16px]">add</span>
+=======
+              <span className="material-symbols-outlined text-[16px]">add</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
               Agregar
             </button>
           </div>
@@ -284,7 +329,11 @@ export default function NotificationSettings() {
               onClick={() => setShowGuide(g => !g)}
               className="flex items-center gap-1 text-[12px] font-semibold text-[#964900] hover:underline cursor-pointer"
             >
+<<<<<<< HEAD
               <span translate="no" className="material-symbols-outlined notranslate text-[15px]">help</span>
+=======
+              <span className="material-symbols-outlined text-[15px]">help</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
               {showGuide ? 'Ocultar guía' : '¿Cómo configurar?'}
             </button>
           }
@@ -293,14 +342,22 @@ export default function NotificationSettings() {
           {showGuide && (
             <div className="bg-[#f7f9fb] border border-[#e0e3e5] rounded-xl p-4 mb-4 flex flex-col gap-3">
               <p className="text-[#041632] text-[12px] font-bold flex items-center gap-1.5">
+<<<<<<< HEAD
                 <span translate="no" className="material-symbols-outlined notranslate text-[15px] text-[#964900]">info</span>
+=======
+                <span className="material-symbols-outlined text-[15px] text-[#964900]">info</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                 Pasos para configurar EmailJS (gratis, 200 correos/mes)
               </p>
               <ol className="flex flex-col gap-2 text-[12px] text-[#44474d] list-none">
                 {[
                   {
                     id: 'create-account',
+<<<<<<< HEAD
                     content: <>Crea tu cuenta en <a href="https://www.emailjs.com" target="_blank" rel="noreferrer" className="text-[#964900] font-semibold hover:underline" translate="no">emailjs.com</a></>,
+=======
+                    content: <>Crea tu cuenta en <a href="https://www.emailjs.com" target="_blank" rel="noreferrer" className="text-[#964900] font-semibold hover:underline">emailjs.com</a></>,
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                   },
                   {
                     id: 'email-services',
@@ -339,12 +396,20 @@ export default function NotificationSettings() {
                     className={`flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-lg transition-colors cursor-pointer
                       ${copiedTpl ? 'bg-[#dcfce7] text-[#15803d]' : 'bg-white border border-[#c5c6ce] text-[#041632] hover:bg-[#f2f4f6]'}`}
                   >
+<<<<<<< HEAD
                     <span translate="no" className="material-symbols-outlined notranslate text-[13px]">{copiedTpl ? 'check' : 'content_copy'}</span>
                     {copiedTpl ? 'Copiado' : 'Copiar'}
                   </button>
                 </div>
                 {/* BLINDAJE: Código de la plantilla de correo */}
                 <pre translate="no" className="bg-[#1e2937] text-[#c9d8e8] text-[11px] p-3 rounded-lg overflow-x-auto leading-relaxed whitespace-pre-wrap notranslate">
+=======
+                    <span className="material-symbols-outlined text-[13px]">{copiedTpl ? 'check' : 'content_copy'}</span>
+                    {copiedTpl ? 'Copiado' : 'Copiar'}
+                  </button>
+                </div>
+                <pre className="bg-[#1e2937] text-[#c9d8e8] text-[11px] p-3 rounded-lg overflow-x-auto leading-relaxed whitespace-pre-wrap">
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                   {EMAIL_TEMPLATE}
                 </pre>
               </div>
@@ -357,8 +422,12 @@ export default function NotificationSettings() {
                 <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-1">
                   {TEMPLATE_VARS.map(({ v, desc }) => (
                     <div key={v} className="flex items-start gap-2 text-[11px]">
+<<<<<<< HEAD
                       {/* BLINDAJE: Variables {{variable}} */}
                       <code translate="no" className="bg-[#e8eaed] text-[#041632] px-1.5 py-0.5 rounded font-mono shrink-0 notranslate">{v}</code>
+=======
+                      <code className="bg-[#e8eaed] text-[#041632] px-1.5 py-0.5 rounded font-mono shrink-0">{v}</code>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                       <span className="text-[#75777e]">{desc}</span>
                     </div>
                   ))}
@@ -429,7 +498,11 @@ export default function NotificationSettings() {
                 </>
               ) : (
                 <>
+<<<<<<< HEAD
                   <span translate="no" className="material-symbols-outlined notranslate text-[16px]">send</span>
+=======
+                  <span className="material-symbols-outlined text-[16px]">send</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                   Enviar correo de prueba
                 </>
               )}
@@ -437,15 +510,25 @@ export default function NotificationSettings() {
 
             {testStatus === 'ok' && (
               <span className="flex items-center gap-1.5 text-[#15803d] text-[13px] font-semibold">
+<<<<<<< HEAD
                 <span translate="no" className="material-symbols-outlined notranslate text-[18px]"
                   style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                 ¡Correo enviado a <span translate="no" className="notranslate">{hrEmails[0]}</span>!
+=======
+                <span className="material-symbols-outlined text-[18px]"
+                  style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                ¡Correo enviado a {hrEmails[0]}!
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
               </span>
             )}
 
             {testStatus === 'error' && (
               <div className="flex items-start gap-1.5 text-[#b91c1c] text-[12px] font-semibold">
+<<<<<<< HEAD
                 <span translate="no" className="material-symbols-outlined notranslate text-[16px] shrink-0"
+=======
+                <span className="material-symbols-outlined text-[16px] shrink-0"
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                   style={{ fontVariationSettings: "'FILL' 1" }}>error</span>
                 <div>
                   <p>Error al enviar</p>
@@ -474,7 +557,11 @@ function Card({ icon, title, subtitle, children, action }) {
       <div className="px-5 py-4 border-b border-[#e0e3e5] bg-[#f7f9fb] flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-[#041632]/[0.08] flex items-center justify-center">
+<<<<<<< HEAD
             <span translate="no" className="material-symbols-outlined notranslate text-[#041632] text-[17px]">{icon}</span>
+=======
+            <span className="material-symbols-outlined text-[#041632] text-[17px]">{icon}</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
           </div>
           <div>
             <p className="text-[#041632] text-[13px] font-bold leading-tight">{title}</p>
@@ -495,7 +582,11 @@ function Toggle({ icon, label, description, checked, onChange, accent }) {
       {/* Icono */}
       <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
            style={{ background: checked ? accent + '15' : '#e8eaed' }}>
+<<<<<<< HEAD
         <span translate="no" className="material-symbols-outlined notranslate text-[17px]"
+=======
+        <span className="material-symbols-outlined text-[17px]"
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
               style={{ color: checked ? accent : '#75777e' }}>{icon}</span>
       </div>
       {/* Texto */}
@@ -522,7 +613,11 @@ function Field({ label, icon, placeholder, value, onChange, show, isLast }) {
   return (
     <div className="flex flex-col gap-1.5">
       <label className="text-[11px] text-[#75777e] font-semibold uppercase tracking-wide flex items-center gap-1.5">
+<<<<<<< HEAD
         <span translate="no" className="material-symbols-outlined notranslate text-[13px]">{icon}</span>
+=======
+        <span className="material-symbols-outlined text-[13px]">{icon}</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
         {label}
       </label>
       <input
@@ -535,4 +630,8 @@ function Field({ label, icon, placeholder, value, onChange, show, isLast }) {
       />
     </div>
   )
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10

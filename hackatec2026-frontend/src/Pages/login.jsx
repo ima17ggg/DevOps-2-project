@@ -11,6 +11,10 @@ export default function Login() {
   const navigate  = useNavigate()
   const { login, isAuthenticated } = useAuth()
 
+<<<<<<< HEAD
+=======
+  // Si ya tiene sesión activa, redirigir directo al dashboard
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
   if (isAuthenticated) return <Navigate to="/dashboard" replace />
 
   const handleSubmit = async (e) => {
@@ -76,9 +80,13 @@ export default function Login() {
         <div className="relative z-10">
           <div className="flex items-center gap-4 mb-10">
             <div className="w-12 h-12 bg-[#fc820c] rounded-xl flex items-center justify-center shadow-lg">
+<<<<<<< HEAD
               <span translate="no" className="material-symbols-outlined notranslate text-white text-[26px]">
                 factory
               </span>
+=======
+              <span className="material-symbols-outlined text-white text-[26px]">factory</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
             </div>
             <div>
               <p className="text-[#b7c8e1] text-[11px] font-semibold uppercase tracking-[0.18em]">
@@ -119,9 +127,13 @@ export default function Login() {
           {/* Mobile: logo pequeño */}
           <div className="flex lg:hidden items-center gap-3 mb-8">
             <div className="w-9 h-9 bg-[#041632] rounded-lg flex items-center justify-center">
+<<<<<<< HEAD
               <span translate="no" className="material-symbols-outlined notranslate text-white text-[18px]">
                 factory
               </span>
+=======
+              <span className="material-symbols-outlined text-white text-[18px]">factory</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
             </div>
             <span className="text-[#041632] text-[17px] font-bold">Workforce Manager</span>
           </div>
@@ -137,13 +149,21 @@ export default function Login() {
 
             {/* ── Usuario ── */}
             <div className="flex flex-col gap-1.5">
+<<<<<<< HEAD
               <label htmlFor="email" className="text-[#041632] text-[13px] font-semibold">
+=======
+              <label htmlFor="username" className="text-[#041632] text-[13px] font-semibold">
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                 Correo o usuario <span className="text-[#ba1a1a]" aria-hidden="true">*</span>
               </label>
               <div className="relative">
                 <span
+<<<<<<< HEAD
                   translate="no"
                   className="material-symbols-outlined notranslate absolute left-3.5 top-1/2 -translate-y-1/2 text-[#75777e] text-[20px] pointer-events-none"
+=======
+                  className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#75777e] text-[20px] pointer-events-none"
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                   aria-hidden="true"
                 >
                   person
@@ -177,8 +197,12 @@ export default function Login() {
               </div>
               <div className="relative">
                 <span
+<<<<<<< HEAD
                   translate="no"
                   className="material-symbols-outlined notranslate absolute left-3.5 top-1/2 -translate-y-1/2 text-[#75777e] text-[20px] pointer-events-none"
+=======
+                  className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#75777e] text-[20px] pointer-events-none"
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                   aria-hidden="true"
                 >
                   lock
@@ -200,7 +224,11 @@ export default function Login() {
                   aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#75777e] hover:text-[#041632] transition-colors cursor-pointer p-0.5 rounded"
                 >
+<<<<<<< HEAD
                   <span translate="no" className="material-symbols-outlined notranslate text-[20px]">
+=======
+                  <span className="material-symbols-outlined text-[20px]">
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                     {showPassword ? 'visibility_off' : 'visibility'}
                   </span>
                 </button>
@@ -214,9 +242,13 @@ export default function Login() {
                 aria-live="polite"
                 className="flex items-center gap-2 px-3 py-2.5 bg-[#ffdad6] border border-[#ba1a1a]/30 rounded-lg text-[#ba1a1a] text-[13px] font-medium"
               >
+<<<<<<< HEAD
                 <span translate="no" className="material-symbols-outlined notranslate text-[16px] flex-shrink-0">
                   error
                 </span>
+=======
+                <span className="material-symbols-outlined text-[16px] flex-shrink-0">error</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                 {error}
               </div>
             )}
@@ -243,9 +275,13 @@ export default function Login() {
                 </>
               ) : (
                 <>
+<<<<<<< HEAD
                   <span translate="no" className="material-symbols-outlined notranslate text-[18px]">
                     login
                   </span>
+=======
+                  <span className="material-symbols-outlined text-[18px]">login</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                   Ingresar al sistema
                 </>
               )}
@@ -263,9 +299,13 @@ export default function Login() {
             type="button"
             className="w-full h-[46px] border border-[#c5c6ce] bg-white hover:bg-[#f2f4f6] text-[#041632] text-[13px] font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer"
           >
+<<<<<<< HEAD
             <span translate="no" className="material-symbols-outlined notranslate text-[18px] text-[#964900]">
               qr_code_scanner
             </span>
+=======
+            <span className="material-symbols-outlined text-[18px] text-[#964900]">qr_code_scanner</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
             Escanear QR de acceso rápido
           </button>
 
@@ -280,6 +320,7 @@ export default function Login() {
   )
 }
 
+<<<<<<< HEAD
 /* Componente auxiliar para stats del panel izquierdo con blindaje anti-traducción */
 function StatBadge({ icon, value, label }) {
   return (
@@ -287,10 +328,21 @@ function StatBadge({ icon, value, label }) {
       <span translate="no" className="material-symbols-outlined notranslate text-[#fc820c] text-[20px]">
         {icon}
       </span>
+=======
+/* Componente auxiliar para stats del panel izquierdo */
+function StatBadge({ icon, value, label }) {
+  return (
+    <div className="flex items-center gap-3 bg-white/[0.07] border border-white/[0.12] rounded-xl px-4 py-3">
+      <span className="material-symbols-outlined text-[#fc820c] text-[20px]">{icon}</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
       <div>
         <p className="text-white text-[16px] font-bold leading-none">{value}</p>
         <p className="text-[#b7c8e1] text-[11px] mt-0.5">{label}</p>
       </div>
     </div>
   )
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10

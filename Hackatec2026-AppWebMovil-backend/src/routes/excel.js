@@ -1,9 +1,15 @@
 import express from 'express';
 import multer from 'multer';
+<<<<<<< HEAD
 import exceljs from 'exceljs';
 import { asyncHandler } from '../middleware/errors.js';
 import { validateRequired, successResponse } from '../utils/validation.js';
 import { importEmployeesFromRows } from '../utils/excel-import.js';
+=======
+import { asyncHandler } from '../middleware/errors.js';
+import { successResponse } from '../utils/validation.js';
+import { importEmployeesFromRows, parseExcelBuffer } from '../utils/excel-import.js';
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
 
 const router = express.Router();
 
@@ -18,15 +24,22 @@ const upload = multer({
   },
 });
 
+<<<<<<< HEAD
 // Upload and import Excel file
 router.post('/import', upload.single('file'), asyncHandler(async (req, res) => {
   if (!req.file) {
     return res.status(400).json({
+=======
+function requireFile(req, res) {
+  if (!req.file) {
+    res.status(400).json({
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
       success: false,
       data: null,
       error: 'No file provided',
       timestamp: new Date().toISOString(),
     });
+<<<<<<< HEAD
   }
 
   const dryRun = req.query.dryRun === 'true';
@@ -36,6 +49,19 @@ router.post('/import', upload.single('file'), asyncHandler(async (req, res) => {
   await workbook.xlsx.load(req.file.buffer);
   const worksheet = workbook.worksheets[0];
   const filas = worksheet.getRows().map(row => row.values.slice(1)); // Remove the first element (row number)
+=======
+    return false;
+  }
+  return true;
+}
+
+// Upload and import Excel file
+router.post('/import', upload.single('file'), asyncHandler(async (req, res) => {
+  if (!requireFile(req, res)) return;
+
+  const dryRun = req.query.dryRun === 'true';
+  const filas = await parseExcelBuffer(req.file.buffer);
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
 
   if (filas.length === 0) {
     return res.status(400).json({
@@ -46,7 +72,10 @@ router.post('/import', upload.single('file'), asyncHandler(async (req, res) => {
     });
   }
 
+<<<<<<< HEAD
   // Import rows
+=======
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
   const results = await importEmployeesFromRows(filas, dryRun);
 
   res.json(successResponse({
@@ -55,6 +84,7 @@ router.post('/import', upload.single('file'), asyncHandler(async (req, res) => {
   }));
 }));
 
+<<<<<<< HEAD
 // Validate Excel file before import
 router.post('/validate', upload.single('file'), asyncHandler(async (req, res) => {
   if (!req.file) {
@@ -72,6 +102,13 @@ router.post('/validate', upload.single('file'), asyncHandler(async (req, res) =>
   const filas = xlsx.utils.sheet_to_json(hoja);
 
   // Run dry import to validate
+=======
+// Validate Excel file before import (siempre corre en dry run)
+router.post('/validate', upload.single('file'), asyncHandler(async (req, res) => {
+  if (!requireFile(req, res)) return;
+
+  const filas = await parseExcelBuffer(req.file.buffer);
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
   const results = await importEmployeesFromRows(filas, true);
 
   res.json(successResponse({
@@ -81,4 +118,8 @@ router.post('/validate', upload.single('file'), asyncHandler(async (req, res) =>
   }));
 }));
 
+<<<<<<< HEAD
 export default router;
+=======
+export default router;
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10

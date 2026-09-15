@@ -4,9 +4,14 @@ export default function TopNavBar() {
       <div className="flex items-center gap-xl flex-1">
         <span className="font-headline-sm text-headline-sm font-black text-primary">Workforce Manager</span>
         <div className="relative w-64">
+<<<<<<< HEAD
           {/* Unicode de "search": \uE8B6 */}
           <span className="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-outline">
             {'\uE8B6'}
+=======
+          <span className="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-outline">
+            search
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
           </span>
           <input
             className="w-full bg-surface-container-low border border-outline-variant rounded-full py-xs pl-xl pr-md font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
@@ -18,6 +23,7 @@ export default function TopNavBar() {
 
       <div className="flex items-center gap-md">
         <button className="text-on-surface-variant hover:text-secondary-container transition-colors p-xs rounded-full hover:bg-surface-container-high">
+<<<<<<< HEAD
           {/* Unicode de "notifications": \uE7F4 */}
           <span className="material-symbols-outlined">
             {'\uE7F4'}
@@ -28,6 +34,12 @@ export default function TopNavBar() {
           <span className="material-symbols-outlined">
             {'\uE8FD'}
           </span>
+=======
+          <span className="material-symbols-outlined">notifications</span>
+        </button>
+        <button className="text-on-surface-variant hover:text-secondary-container transition-colors p-xs rounded-full hover:bg-surface-container-high">
+          <span className="material-symbols-outlined">help_outline</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
         </button>
         <button className="border border-primary text-primary font-label-md text-label-md py-xs px-md rounded-lg hover:bg-surface-container transition-colors ml-sm">
           Search Records

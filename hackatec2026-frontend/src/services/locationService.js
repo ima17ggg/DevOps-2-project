@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * locationService.js
  *
@@ -66,19 +67,52 @@ export function getAllLocations() {
 
 // ── Sesión de tracking (persiste entre navegaciones) ────────────────────────
 export function startTrackingSession(employee) {
+=======
+const API_BASE = '/api'
+const LOCATIONS_KEY = 'gps_locations:v1'
+const SESSION_KEY = 'gps_session:v1'
+
+export const PLANT_CENTER = { lat: 25.442251, lng: -100.993114 }
+
+export async function sendLocation(employeeId, lat, lng) {
+  if (!employeeId || !Number.isFinite(lat) || !Number.isFinite(lng)) return
+
+  try {
+    await fetch(`${API_BASE}/locations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ employeeId, lat, lng }),
+    })
+  } catch {
+    const locations = readStoredLocations()
+    locations[employeeId] = { lat, lng, updatedAt: Date.now() }
+    localStorage.setItem(LOCATIONS_KEY, JSON.stringify(locations))
+  }
+}
+
+export function startTrackingSession(employee) {
+  if (!employee?.id) return
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
   localStorage.setItem(SESSION_KEY, JSON.stringify({ ...employee, active: true }))
 }
 
 export function stopTrackingSession() {
   const session = getTrackingSession()
+<<<<<<< HEAD
   if (session) {
     removeLocation(session.id)
     localStorage.setItem(SESSION_KEY, JSON.stringify({ ...session, active: false }))
   }
+=======
+  if (!session) return
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ ...session, active: false }))
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
 }
 
 export function getTrackingSession() {
   try {
+<<<<<<< HEAD
     const current = localStorage.getItem(SESSION_KEY)
     if (current) return JSON.parse(current)
 
@@ -89,11 +123,16 @@ export function getTrackingSession() {
     localStorage.setItem(SESSION_KEY, JSON.stringify(parsed))
     localStorage.removeItem(SESSION_KEY_LEGACY)
     return parsed
+=======
+    const raw = localStorage.getItem(SESSION_KEY)
+    return raw ? JSON.parse(raw) : null
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
   } catch {
     return null
   }
 }
 
+<<<<<<< HEAD
 // ── Helpers internos ─────────────────────────────────────────────────────────
 function readLocations() {
   try {
@@ -111,3 +150,39 @@ function readLocations() {
     return {}
   }
 }
+=======
+export async function getAllLocations() {
+  let json
+  try {
+    const res = await fetch(`${API_BASE}/locations`, { credentials: 'include' })
+    if (!res.ok) return readStoredLocations()
+    json = await res.json()
+  } catch {
+    return readStoredLocations()
+  }
+
+  if (!json?.success || !Array.isArray(json.data)) return readStoredLocations()
+
+  const locations = {}
+  for (const row of json.data) {
+    locations[row.id_empleado] = {
+      lat: row.latitud,
+      lng: row.longitud,
+      name: [row.empleados?.nombre, row.empleados?.apellido_paterno].filter(Boolean).join(' '),
+      role: row.empleados?.roles?.nombre || 'Empleado',
+      updatedAt: row.updated_at ? new Date(row.updated_at).getTime() : Date.now(),
+    }
+  }
+  return locations
+}
+
+function readStoredLocations() {
+  try {
+    const raw = localStorage.getItem(LOCATIONS_KEY)
+    const locations = raw ? JSON.parse(raw) : {}
+    return locations && typeof locations === 'object' ? locations : {}
+  } catch {
+    return {}
+  }
+}
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10

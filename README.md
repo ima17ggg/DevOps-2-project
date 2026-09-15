@@ -10,7 +10,10 @@ El proyecto está dividido en dos partes:
 ## Versiones
 
 Las versiones usadas en el proyecto corresponden a los package.json de cada parte:
+<<<<<<< HEAD
 -  node": "24.20.0"
+=======
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
 
 ### Backend
 

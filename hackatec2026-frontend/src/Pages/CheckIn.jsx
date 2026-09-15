@@ -1,6 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { startTrackingSession } from '../services/locationService'
+<<<<<<< HEAD
+=======
+import { recordCheckIn } from '../services/checkInActivityService'
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
 import {
   getQRSession,
   getSessionEmployees,
@@ -97,16 +101,34 @@ export default function CheckIn() {
 
   // ── Acciones ────────────────────────────────────────────────────────────────
 
+<<<<<<< HEAD
   const handleQrDetected = () => {
     stopCamera()
     if (qrSession) {
       setStep('pick')
     } else {
+=======
+  /**
+   * Simula la detección exitosa del QR.
+   * Reemplazar con jsQR real: parsear el token de la URL embebida en el QR.
+   */
+  const handleQrDetected = () => {
+    stopCamera()
+    if (qrSession) {
+      // Si hay sesión activa, ir al selector de empleado
+      setStep('pick')
+    } else {
+      // Sin sesión → usar empleado mock
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
       setEmployee(MOCK_EMPLOYEE)
       setStep('confirm')
     }
   }
 
+<<<<<<< HEAD
+=======
+  /** El empleado se selecciona a sí mismo en el picker de la sesión QR */
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
   const handlePickEmployee = (emp) => {
     const fullEmployee = {
       ...emp,
@@ -114,11 +136,19 @@ export default function CheckIn() {
       shift:  qrSession?.shift ?? emp.shift,
       status: 'Activo',
     }
+<<<<<<< HEAD
+=======
+    // Vincular este dispositivo con el empleado para futuras entradas
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
     if (sessionToken) registerDeviceForEmployee(sessionToken, emp.id)
     setEmployee(fullEmployee)
     setStep('confirm')
   }
 
+<<<<<<< HEAD
+=======
+  /** Captura el frame actual del video como foto */
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
   const capturePhoto = () => {
     const video  = videoRef.current
     const canvas = canvasRef.current
@@ -138,9 +168,20 @@ export default function CheckIn() {
   const handleRegister = () => {
     if (!photo) return
     setIsRegistering(true)
+<<<<<<< HEAD
     setTimeout(() => {
       stopCamera()
       startTrackingSession({ id: employee.id, name: employee.name, role: employee.role })
+=======
+    // ── Reemplazar con llamada real al API ───────────────────────────────────
+    // await fetch('/api/checkin', { method:'POST', body: JSON.stringify({ employeeId: employee.id, photo }) })
+    // ────────────────────────────────────────────────────────────────────────
+    setTimeout(() => {
+      stopCamera()
+      // ── Activa rastreo GPS en background (persiste mientras use la app)
+      startTrackingSession({ id: employee.id, name: employee.name, role: employee.role })
+      recordCheckIn(employee, photo)
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
       setStep('done')
       setIsRegistering(false)
     }, 1400)
@@ -151,8 +192,12 @@ export default function CheckIn() {
     return (
       <div className="min-h-screen bg-[#f7f9fb] flex flex-col items-center justify-center gap-6 px-6">
         <div className="w-20 h-20 rounded-full bg-[#dcfce7] flex items-center justify-center">
+<<<<<<< HEAD
           <span className="material-symbols-outlined notranslate text-[#15803d] text-[44px]"
             translate="no"
+=======
+          <span className="material-symbols-outlined text-[#15803d] text-[44px]"
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
             style={{ fontVariationSettings: "'FILL' 1" }}>
             check_circle
           </span>
@@ -194,7 +239,11 @@ export default function CheckIn() {
             onClick={() => { stopCamera(); navigate('/chekin') }}
             className="flex items-center gap-1.5 text-[#041632] text-[13px] font-semibold hover:text-[#964900] transition-colors cursor-pointer"
           >
+<<<<<<< HEAD
             <span className="material-symbols-outlined notranslate text-[18px]" translate="no">arrow_back</span>
+=======
+            <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
             Regresar
           </button>
           <div className="h-5 w-px bg-[#e0e3e5]" />
@@ -238,7 +287,11 @@ export default function CheckIn() {
 
             {cameraError ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
+<<<<<<< HEAD
                 <span className="material-symbols-outlined notranslate text-[#fc820c] text-[40px]" translate="no">videocam_off</span>
+=======
+                <span className="material-symbols-outlined text-[#fc820c] text-[40px]">videocam_off</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                 <p className="text-white text-[13px]">{cameraError}</p>
                 <button
                   onClick={() => startCamera('environment')}
@@ -259,6 +312,10 @@ export default function CheckIn() {
                 {/* Marco de QR con esquinas animadas */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="relative w-52 h-52">
+<<<<<<< HEAD
+=======
+                    {/* Esquinas del marco */}
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                     {[
                       'top-0 left-0 border-t-4 border-l-4 rounded-tl-lg',
                       'top-0 right-0 border-t-4 border-r-4 rounded-tr-lg',
@@ -267,22 +324,38 @@ export default function CheckIn() {
                     ].map((cls, i) => (
                       <div key={i} className={`absolute w-9 h-9 border-[#fc820c] ${cls}`} />
                     ))}
+<<<<<<< HEAD
+=======
+                    {/* Línea de escaneo animada */}
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                     <div className="absolute left-2 right-2 top-0 h-0.5 bg-[#fc820c]/80 animate-[scan_2s_ease-in-out_infinite]"
                          style={{ animation: 'scan 2s ease-in-out infinite' }} />
                   </div>
                 </div>
+<<<<<<< HEAD
+=======
+                {/* Oscurecido fuera del marco */}
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                 <div className="absolute inset-0 pointer-events-none"
                      style={{ boxShadow: 'inset 0 0 0 9999px rgba(0,0,0,0.45)' }} />
               </>
             )}
           </div>
 
+<<<<<<< HEAD
+=======
+          {/* Botón de confirmar (simula detección exitosa; reemplazar con jsQR real) */}
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
           <button
             onClick={handleQrDetected}
             disabled={!!cameraError}
             className="h-[50px] px-10 bg-[#041632] hover:bg-[#1b2b48] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-bold rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer shadow-md"
           >
+<<<<<<< HEAD
             <span className="material-symbols-outlined notranslate text-[#fc820c] text-[20px]" translate="no">qr_code_scanner</span>
+=======
+            <span className="material-symbols-outlined text-[#fc820c] text-[20px]">qr_code_scanner</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
             QR Detectado — Continuar
           </button>
           <p className="text-[#75777e] text-[12px]">
@@ -294,10 +367,17 @@ export default function CheckIn() {
       {/* ══════════════════════ PASO PICK: Seleccionar empleado ══════════════ */}
       {step === 'pick' && (
         <div className="flex-1 flex flex-col items-center px-6 py-8 gap-6 max-w-[520px] w-full mx-auto">
+<<<<<<< HEAD
           <div className="text-center w-full">
             <div className="w-14 h-14 rounded-full bg-[#fc820c]/10 flex items-center justify-center mx-auto mb-3">
               <span className="material-symbols-outlined notranslate text-[#fc820c] text-[30px]"
                 translate="no"
+=======
+          {/* Cabecera */}
+          <div className="text-center w-full">
+            <div className="w-14 h-14 rounded-full bg-[#fc820c]/10 flex items-center justify-center mx-auto mb-3">
+              <span className="material-symbols-outlined text-[#fc820c] text-[30px]"
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                 style={{ fontVariationSettings: "'FILL' 1" }}>badge</span>
             </div>
             <h1 className="text-[#041632] text-[22px] font-black">¿Quién eres?</h1>
@@ -306,7 +386,11 @@ export default function CheckIn() {
             </p>
             {qrSession && (
               <div className="mt-3 inline-flex items-center gap-2 bg-[#041632]/[0.06] border border-[#041632]/20 rounded-full px-4 py-1.5">
+<<<<<<< HEAD
                 <span className="material-symbols-outlined notranslate text-[#041632] text-[14px]" translate="no">schedule</span>
+=======
+                <span className="material-symbols-outlined text-[#041632] text-[14px]">schedule</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                 <span className="text-[#041632] text-[12px] font-semibold">
                   {qrSession.shift} · {qrSession.date}
                 </span>
@@ -314,6 +398,10 @@ export default function CheckIn() {
             )}
           </div>
 
+<<<<<<< HEAD
+=======
+          {/* Lista de empleados de la sesión */}
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
           <div className="w-full bg-white border border-[#e0e3e5] rounded-2xl shadow-sm overflow-hidden">
             <div className="px-4 py-2.5 bg-[#f7f9fb] border-b border-[#e0e3e5]">
               <p className="text-[11px] text-[#75777e] font-semibold uppercase tracking-wide">
@@ -322,7 +410,11 @@ export default function CheckIn() {
             </div>
             {sessionEmployees.length === 0 ? (
               <div className="py-10 text-center text-[#75777e] text-[13px]">
+<<<<<<< HEAD
                 <span className="material-symbols-outlined notranslate text-[32px] block mb-2" translate="no">person_off</span>
+=======
+                <span className="material-symbols-outlined text-[32px] block mb-2">person_off</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                 No hay empleados registrados en esta sesión
               </div>
             ) : (
@@ -332,6 +424,10 @@ export default function CheckIn() {
                   onClick={() => handlePickEmployee(emp)}
                   className="w-full flex items-center gap-3.5 px-4 py-3.5 border-b border-[#f2f4f6] hover:bg-[#041632]/[0.04] active:bg-[#041632]/[0.08] transition-colors cursor-pointer text-left"
                 >
+<<<<<<< HEAD
+=======
+                  {/* Avatar */}
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                   <div className="w-11 h-11 rounded-full bg-[#041632] text-white flex items-center justify-center text-[13px] font-bold shrink-0">
                     {emp.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
                   </div>
@@ -341,7 +437,11 @@ export default function CheckIn() {
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
                     <span className="text-[11px] font-mono text-[#adb0b7]">{emp.id}</span>
+<<<<<<< HEAD
                     <span className="material-symbols-outlined notranslate text-[#c5c6ce] text-[18px]" translate="no">chevron_right</span>
+=======
+                    <span className="material-symbols-outlined text-[#c5c6ce] text-[18px]">chevron_right</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                   </div>
                 </button>
               ))
@@ -362,10 +462,17 @@ export default function CheckIn() {
           {/* ── Tarjeta de empleado ── */}
           <div className="flex flex-col gap-5">
             <div className="bg-white border border-[#e0e3e5] rounded-2xl shadow-sm overflow-hidden">
+<<<<<<< HEAD
               <div className="bg-[#041632] px-5 py-5 flex items-center gap-4">
                 <div className="w-14 h-14 rounded-full bg-[#1b2b48] border-2 border-[#fc820c]/40 flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined notranslate text-[#b7c8e1] text-[32px]"
                     translate="no"
+=======
+              {/* Cabecera de la tarjeta */}
+              <div className="bg-[#041632] px-5 py-5 flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-[#1b2b48] border-2 border-[#fc820c]/40 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-[#b7c8e1] text-[32px]"
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                     style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
                 </div>
                 <div>
@@ -389,7 +496,11 @@ export default function CheckIn() {
               {/* Hora de registro */}
               <div className="px-5 pb-5">
                 <div className="bg-[#f7f9fb] border border-[#e0e3e5] rounded-xl px-4 py-3 flex items-center gap-3">
+<<<<<<< HEAD
                   <span className="material-symbols-outlined notranslate text-[#fc820c] text-[20px]" translate="no">schedule</span>
+=======
+                  <span className="material-symbols-outlined text-[#fc820c] text-[20px]">schedule</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                   <div>
                     <p className="text-[#75777e] text-[11px] uppercase font-semibold tracking-wide">Hora de entrada</p>
                     <p className="text-[#041632] text-[16px] font-bold font-mono">
@@ -403,8 +514,12 @@ export default function CheckIn() {
             {/* QR registrado — confirmación visual */}
             <div className="bg-white border border-[#e0e3e5] rounded-2xl shadow-sm px-5 py-4 flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#dcfce7] flex items-center justify-center shrink-0">
+<<<<<<< HEAD
                 <span className="material-symbols-outlined notranslate text-[#15803d] text-[20px]"
                   translate="no"
+=======
+                <span className="material-symbols-outlined text-[#15803d] text-[20px]"
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                   style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
               </div>
               <div>
@@ -418,12 +533,20 @@ export default function CheckIn() {
           <div className="flex flex-col gap-5">
             <div className="bg-white border border-[#e0e3e5] rounded-2xl shadow-sm overflow-hidden flex flex-col">
               <div className="px-5 py-4 border-b border-[#e0e3e5] flex items-center gap-2">
+<<<<<<< HEAD
                 <span className="material-symbols-outlined notranslate text-[#041632] text-[20px]" translate="no">photo_camera</span>
                 <h2 className="text-[#041632] text-[15px] font-bold">Verificación fotográfica</h2>
                 {photo && (
                   <span className="ml-auto text-[#15803d] text-[11px] font-semibold flex items-center gap-1">
                     <span className="material-symbols-outlined notranslate text-[14px]"
                       translate="no"
+=======
+                <span className="material-symbols-outlined text-[#041632] text-[20px]">photo_camera</span>
+                <h2 className="text-[#041632] text-[15px] font-bold">Verificación fotográfica</h2>
+                {photo && (
+                  <span className="ml-auto text-[#15803d] text-[11px] font-semibold flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[14px]"
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                       style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                     Foto capturada
                   </span>
@@ -431,14 +554,26 @@ export default function CheckIn() {
               </div>
 
               <div className="p-5 flex flex-col gap-4 flex-1">
+<<<<<<< HEAD
+=======
+                {/* Área de cámara / foto */}
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                 <div className="relative bg-[#191c1e] rounded-xl overflow-hidden flex items-center justify-center"
                      style={{ minHeight: '260px' }}>
 
                   {photo ? (
+<<<<<<< HEAD
                     <img src={photo} alt="Foto verificación" className="w-full h-full object-cover" />
                   ) : cameraError ? (
                     <div className="flex flex-col items-center gap-2 p-6 text-center">
                       <span className="material-symbols-outlined notranslate text-[#fc820c] text-[36px]" translate="no">videocam_off</span>
+=======
+                    // Muestra la foto capturada
+                    <img src={photo} alt="Foto verificación" className="w-full h-full object-cover" />
+                  ) : cameraError ? (
+                    <div className="flex flex-col items-center gap-2 p-6 text-center">
+                      <span className="material-symbols-outlined text-[#fc820c] text-[36px]">videocam_off</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                       <p className="text-white text-[12px]">{cameraError}</p>
                     </div>
                   ) : (
@@ -450,6 +585,10 @@ export default function CheckIn() {
                         muted
                         className="w-full h-full object-cover"
                       />
+<<<<<<< HEAD
+=======
+                      {/* Guía de encuadre */}
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <div className="w-36 h-44 rounded-full border-2 border-white/40 border-dashed" />
                       </div>
@@ -463,7 +602,11 @@ export default function CheckIn() {
                     onClick={retakePhoto}
                     className="w-full h-[44px] border border-[#c5c6ce] bg-white hover:bg-[#f2f4f6] text-[#041632] text-[13px] font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
                   >
+<<<<<<< HEAD
                     <span className="material-symbols-outlined notranslate text-[18px]" translate="no">replay</span>
+=======
+                    <span className="material-symbols-outlined text-[18px]">replay</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                     Tomar de nuevo
                   </button>
                 ) : (
@@ -472,7 +615,11 @@ export default function CheckIn() {
                     disabled={!!cameraError}
                     className="w-full h-[46px] bg-[#041632] hover:bg-[#1b2b48] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[13px] font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
                   >
+<<<<<<< HEAD
                     <span className="material-symbols-outlined notranslate text-[18px]" translate="no">camera</span>
+=======
+                    <span className="material-symbols-outlined text-[18px]">camera</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                     Capturar foto
                   </button>
                 )}
@@ -499,8 +646,12 @@ export default function CheckIn() {
                 </>
               ) : (
                 <>
+<<<<<<< HEAD
                   <span className="material-symbols-outlined notranslate text-[20px]"
                     translate="no"
+=======
+                  <span className="material-symbols-outlined text-[20px]"
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
                     style={{ fontVariationSettings: "'FILL' 1" }}>how_to_reg</span>
                   {photo ? 'Confirmar y registrar entrada' : 'Toma la foto para continuar'}
                 </>
@@ -535,7 +686,11 @@ function StepDot({ n, label, active, done }) {
         active ? 'bg-[#041632] text-white' :
                  'bg-[#e0e3e5] text-[#75777e]'
       }`}>
+<<<<<<< HEAD
         {done ? <span className="material-symbols-outlined notranslate text-[14px]" translate="no">check</span> : n}
+=======
+        {done ? <span className="material-symbols-outlined text-[14px]">check</span> : n}
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
       </div>
       <span className={`text-[12px] font-medium hidden sm:inline ${active ? 'text-[#041632]' : 'text-[#75777e]'}`}>
         {label}
@@ -548,10 +703,18 @@ function InfoField({ label, value, icon, mono = false }) {
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-1 text-[#75777e]">
+<<<<<<< HEAD
         <span className="material-symbols-outlined notranslate text-[14px]" translate="no">{icon}</span>
+=======
+        <span className="material-symbols-outlined text-[14px]">{icon}</span>
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
         <span className="text-[11px] font-semibold uppercase tracking-wide">{label}</span>
       </div>
       <p className={`text-[#041632] text-[14px] font-semibold ${mono ? 'font-mono' : ''}`}>{value}</p>
     </div>
   )
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
