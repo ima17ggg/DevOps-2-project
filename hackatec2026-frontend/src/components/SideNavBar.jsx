@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 const navItems = [
   { icon: 'dashboard',     label: 'Dashboard',        to: '/dashboard'    },
@@ -10,11 +11,12 @@ const navItems = [
 
 export default function SideNavBar() {
   const navigate = useNavigate()
+  const { logout } = useAuth() // Assuming you have a custom hook for authentication
 
-  const handleLogout = (e, targetPath) => {
-    if (targetPath === '/logout') {
+  const handleLogout = async (e, targetPath) => {
+      if (targetPath === '/logout') {
       e.preventDefault()
-      // Lógica de logout adicional (ej. limpiar token de sesión)
+      await logout()
       navigate('/login')
     }
   }
