@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 3,
+  "version": "0.9.12",
+  "ok": false,
+  "directory": "C:\\Users\\Administrator\\Downloads\\Hackatec2026-frontend\\hackatec2026-frontend",
+  "mode": "full",
+  "diff": null,
+  "projects": [],
+  "diagnostics": [],
+  "summary": {
+    "errorCount": 0,
+    "warningCount": 0,
+    "affectedFileCount": 0,
+    "totalDiagnosticCount": 0,
+    "score": null,
+    "scoreLabel": null
+  },
+  "elapsedMilliseconds": 2.1048000000000684,
+  "error": {
+    "message": "Unknown category \"Correctness\". Expected one of: Security, Bugs, Performance, Accessibility, Maintainability.",
+    "name": "CliInputError",
+    "chain": [
+      "Unknown category \"Correctness\". Expected one of: Security, Bugs, Performance, Accessibility, Maintainability."
+    ],
+    "sentryEventId": null
+  }
+}
