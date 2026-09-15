@@ -1,0 +1,131 @@
+<!doctype html>
+<!-- 1. Se agrega translate="no" y class="notranslate" en el tag html -->
+<html lang="es" translate="no" class="notranslate">
+  <head>
+    <meta charset="UTF-8" />
+    
+    <!-- 2. Meta tag que indica explícitamente a Google Translate no traducir la página -->
+    <meta name="google" content="notranslate" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Workforce Manager Dashboard</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed-dim": "#b7c8e1",
+              "on-secondary-fixed-variant": "#723600",
+              "surface-variant": "#e0e3e5",
+              "surface-dim": "#d8dadc",
+              "on-primary-container": "#8393b5",
+              "background": "#f7f9fb",
+              "on-tertiary-fixed": "#0b1c30",
+              "surface-container-high": "#e6e8ea",
+              "on-tertiary": "#ffffff",
+              "on-secondary-container": "#5e2c00",
+              "on-surface-variant": "#44474d",
+              "on-error-container": "#93000a",
+              "inverse-surface": "#2d3133",
+              "primary": "#041632",
+              "secondary": "#964900",
+              "tertiary": "#06172a",
+              "outline-variant": "#c5c6ce",
+              "on-secondary": "#ffffff",
+              "on-primary-fixed": "#091b37",
+              "primary-container": "#1b2b48",
+              "inverse-primary": "#b7c7eb",
+              "error": "#ba1a1a",
+              "on-primary-fixed-variant": "#374765",
+              "tertiary-container": "#1c2c40",
+              "tertiary-fixed": "#d3e4fe",
+              "surface-container": "#eceef0",
+              "on-tertiary-container": "#8393ac",
+              "surface": "#f7f9fb",
+              "on-background": "#191c1e",
+              "surface-container-highest": "#e0e3e5",
+              "on-surface": "#191c1e",
+              "surface-container-low": "#f2f4f6",
+              "error-container": "#ffdad6",
+              "surface-bright": "#f7f9fb",
+              "primary-fixed-dim": "#b7c7eb",
+              "secondary-fixed": "#ffdcc6",
+              "on-error": "#ffffff",
+              "secondary-fixed-dim": "#ffb786",
+              "on-secondary-fixed": "#311300",
+              "outline": "#75777e",
+              "inverse-on-surface": "#eff1f3",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-fixed-variant": "#38485d",
+              "surface-tint": "#4f5e7e",
+              "secondary-container": "#fc820c",
+              "primary-fixed": "#d7e2ff",
+              "on-primary": "#ffffff"
+            },
+            borderRadius: {
+              "DEFAULT": "0.25rem",
+              "lg": "0.5rem",
+              "xl": "0.75rem",
+              "full": "9999px"
+            },
+            spacing: {
+              "xl": "40px",
+              "md": "16px",
+              "sm": "8px",
+              "lg": "24px",
+              "xs": "4px",
+              "base": "4px",
+              "gutter": "16px",
+              "container-max": "1440px"
+            },
+            fontFamily: {
+              "headline-sm": ["Inter"],
+              "headline-md": ["Inter"],
+              "body-lg": ["Inter"],
+              "label-lg": ["Inter"],
+              "body-md": ["Inter"],
+              "label-md": ["Inter"],
+              "code-md": ["monospace"],
+              "headline-lg-mobile": ["Inter"],
+              "headline-lg": ["Inter"]
+            },
+            fontSize: {
+              "headline-sm": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "label-lg": ["14px", { lineHeight: "20px", letterSpacing: "0.05em", fontWeight: "600" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "label-md": ["12px", { lineHeight: "16px", fontWeight: "500" }],
+              "code-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "headline-lg-mobile": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "700" }],
+              "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }]
+            }
+          }
+        }
+      }
+    </script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <style>
+      .material-symbols-outlined,
+      .material-icons {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .fill-icon .material-symbols-outlined {
+        font-variation-settings: 'FILL' 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
