@@ -112,7 +112,12 @@ router.get('/session', authenticateJWT, asyncHandler(async (req, res) => {
 }));
 
 router.post('/logout', asyncHandler(async (req, res) => {
-  res.clearCookie('auth_token', { path: '/' });
+  res.clearCookie('auth_token', {
+    path: '/',
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  });
 
   return res.json(successResponse({
     message: 'Sesión cerrada correctamente',
