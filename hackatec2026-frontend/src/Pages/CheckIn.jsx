@@ -32,7 +32,7 @@ export default function CheckIn() {
   const sessionEmployees = qrSession ? getSessionEmployees(sessionToken) : []
 
   // Pasos: 'qr' → 'pick' (selector de empleado) → 'confirm' → 'done'
-  const [step, setStep]               = useState(() => {
+  const [step, setStep]                     = useState(() => {
     if (qrSession) {
       // Si el dispositivo ya está vinculado, saltar selección
       const knownId = getEmployeeByDevice(sessionToken)
@@ -41,7 +41,7 @@ export default function CheckIn() {
     }
     return 'qr'         // flujo manual sin sesión
   })
-  const [employee, setEmployee]       = useState(() => {
+  const [employee, setEmployee]             = useState(() => {
     if (qrSession) {
       const knownId = getEmployeeByDevice(sessionToken)
       if (knownId) {
@@ -56,7 +56,7 @@ export default function CheckIn() {
     }
     return null
   })
-  const [photo, setPhoto]             = useState(null)
+  const [photo, setPhoto]                   = useState(null)
   const [cameraError, setCameraError] = useState('')
   const [isRegistering, setIsRegistering] = useState(false)
 
@@ -148,12 +148,9 @@ export default function CheckIn() {
   const handleRegister = () => {
     if (!photo) return
     setIsRegistering(true)
-    // ── Reemplazar con llamada real al API ───────────────────────────────────
-    // await fetch('/api/checkin', { method:'POST', body: JSON.stringify({ employeeId: employee.id, photo }) })
-    // ────────────────────────────────────────────────────────────────────────
     setTimeout(() => {
       stopCamera()
-      // ── Activa rastreo GPS en background (persiste mientras use la app)
+      // Activa rastreo GPS en background (persiste mientras use la app)
       startTrackingSession({ id: employee.id, name: employee.name, role: employee.role })
       recordCheckIn(employee, photo)
       setStep('done')
@@ -166,7 +163,8 @@ export default function CheckIn() {
     return (
       <div className="min-h-screen bg-[#f7f9fb] flex flex-col items-center justify-center gap-6 px-6">
         <div className="w-20 h-20 rounded-full bg-[#dcfce7] flex items-center justify-center">
-          <span className="material-symbols-outlined text-[#15803d] text-[44px]"
+          <span className="material-symbols-outlined notranslate text-[#15803d] text-[44px]"
+            translate="no"
             style={{ fontVariationSettings: "'FILL' 1" }}>
             check_circle
           </span>
@@ -208,7 +206,7 @@ export default function CheckIn() {
             onClick={() => { stopCamera(); navigate('/chekin') }}
             className="flex items-center gap-1.5 text-[#041632] text-[13px] font-semibold hover:text-[#964900] transition-colors cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+            <span className="material-symbols-outlined notranslate text-[18px]" translate="no">arrow_back</span>
             Regresar
           </button>
           <div className="h-5 w-px bg-[#e0e3e5]" />
@@ -252,7 +250,7 @@ export default function CheckIn() {
 
             {cameraError ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
-                <span className="material-symbols-outlined text-[#fc820c] text-[40px]">videocam_off</span>
+                <span className="material-symbols-outlined notranslate text-[#fc820c] text-[40px]" translate="no">videocam_off</span>
                 <p className="text-white text-[13px]">{cameraError}</p>
                 <button
                   onClick={() => startCamera('environment')}
@@ -300,7 +298,7 @@ export default function CheckIn() {
             disabled={!!cameraError}
             className="h-[50px] px-10 bg-[#041632] hover:bg-[#1b2b48] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-bold rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer shadow-md"
           >
-            <span className="material-symbols-outlined text-[#fc820c] text-[20px]">qr_code_scanner</span>
+            <span className="material-symbols-outlined notranslate text-[#fc820c] text-[20px]" translate="no">qr_code_scanner</span>
             QR Detectado — Continuar
           </button>
           <p className="text-[#75777e] text-[12px]">
@@ -315,7 +313,8 @@ export default function CheckIn() {
           {/* Cabecera */}
           <div className="text-center w-full">
             <div className="w-14 h-14 rounded-full bg-[#fc820c]/10 flex items-center justify-center mx-auto mb-3">
-              <span className="material-symbols-outlined text-[#fc820c] text-[30px]"
+              <span className="material-symbols-outlined notranslate text-[#fc820c] text-[30px]"
+                translate="no"
                 style={{ fontVariationSettings: "'FILL' 1" }}>badge</span>
             </div>
             <h1 className="text-[#041632] text-[22px] font-black">¿Quién eres?</h1>
@@ -324,7 +323,7 @@ export default function CheckIn() {
             </p>
             {qrSession && (
               <div className="mt-3 inline-flex items-center gap-2 bg-[#041632]/[0.06] border border-[#041632]/20 rounded-full px-4 py-1.5">
-                <span className="material-symbols-outlined text-[#041632] text-[14px]">schedule</span>
+                <span className="material-symbols-outlined notranslate text-[#041632] text-[14px]" translate="no">schedule</span>
                 <span className="text-[#041632] text-[12px] font-semibold">
                   {qrSession.shift} · {qrSession.date}
                 </span>
@@ -341,7 +340,7 @@ export default function CheckIn() {
             </div>
             {sessionEmployees.length === 0 ? (
               <div className="py-10 text-center text-[#75777e] text-[13px]">
-                <span className="material-symbols-outlined text-[32px] block mb-2">person_off</span>
+                <span className="material-symbols-outlined notranslate text-[32px] block mb-2" translate="no">person_off</span>
                 No hay empleados registrados en esta sesión
               </div>
             ) : (
@@ -361,7 +360,7 @@ export default function CheckIn() {
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
                     <span className="text-[11px] font-mono text-[#adb0b7]">{emp.id}</span>
-                    <span className="material-symbols-outlined text-[#c5c6ce] text-[18px]">chevron_right</span>
+                    <span className="material-symbols-outlined notranslate text-[#c5c6ce] text-[18px]" translate="no">chevron_right</span>
                   </div>
                 </button>
               ))
@@ -385,7 +384,8 @@ export default function CheckIn() {
               {/* Cabecera de la tarjeta */}
               <div className="bg-[#041632] px-5 py-5 flex items-center gap-4">
                 <div className="w-14 h-14 rounded-full bg-[#1b2b48] border-2 border-[#fc820c]/40 flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-[#b7c8e1] text-[32px]"
+                  <span className="material-symbols-outlined notranslate text-[#b7c8e1] text-[32px]"
+                    translate="no"
                     style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
                 </div>
                 <div>
@@ -409,7 +409,7 @@ export default function CheckIn() {
               {/* Hora de registro */}
               <div className="px-5 pb-5">
                 <div className="bg-[#f7f9fb] border border-[#e0e3e5] rounded-xl px-4 py-3 flex items-center gap-3">
-                  <span className="material-symbols-outlined text-[#fc820c] text-[20px]">schedule</span>
+                  <span className="material-symbols-outlined notranslate text-[#fc820c] text-[20px]" translate="no">schedule</span>
                   <div>
                     <p className="text-[#75777e] text-[11px] uppercase font-semibold tracking-wide">Hora de entrada</p>
                     <p className="text-[#041632] text-[16px] font-bold font-mono">
@@ -423,7 +423,8 @@ export default function CheckIn() {
             {/* QR registrado — confirmación visual */}
             <div className="bg-white border border-[#e0e3e5] rounded-2xl shadow-sm px-5 py-4 flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#dcfce7] flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[#15803d] text-[20px]"
+                <span className="material-symbols-outlined notranslate text-[#15803d] text-[20px]"
+                  translate="no"
                   style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
               </div>
               <div>
@@ -437,11 +438,12 @@ export default function CheckIn() {
           <div className="flex flex-col gap-5">
             <div className="bg-white border border-[#e0e3e5] rounded-2xl shadow-sm overflow-hidden flex flex-col">
               <div className="px-5 py-4 border-b border-[#e0e3e5] flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#041632] text-[20px]">photo_camera</span>
+                <span className="material-symbols-outlined notranslate text-[#041632] text-[20px]" translate="no">photo_camera</span>
                 <h2 className="text-[#041632] text-[15px] font-bold">Verificación fotográfica</h2>
                 {photo && (
                   <span className="ml-auto text-[#15803d] text-[11px] font-semibold flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]"
+                    <span className="material-symbols-outlined notranslate text-[14px]"
+                      translate="no"
                       style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                     Foto capturada
                   </span>
@@ -458,7 +460,7 @@ export default function CheckIn() {
                     <img src={photo} alt="Foto verificación" className="w-full h-full object-cover" />
                   ) : cameraError ? (
                     <div className="flex flex-col items-center gap-2 p-6 text-center">
-                      <span className="material-symbols-outlined text-[#fc820c] text-[36px]">videocam_off</span>
+                      <span className="material-symbols-outlined notranslate text-[#fc820c] text-[36px]" translate="no">videocam_off</span>
                       <p className="text-white text-[12px]">{cameraError}</p>
                     </div>
                   ) : (
@@ -484,7 +486,7 @@ export default function CheckIn() {
                     onClick={retakePhoto}
                     className="w-full h-[44px] border border-[#c5c6ce] bg-white hover:bg-[#f2f4f6] text-[#041632] text-[13px] font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
                   >
-                    <span className="material-symbols-outlined text-[18px]">replay</span>
+                    <span className="material-symbols-outlined notranslate text-[18px]" translate="no">replay</span>
                     Tomar de nuevo
                   </button>
                 ) : (
@@ -493,7 +495,7 @@ export default function CheckIn() {
                     disabled={!!cameraError}
                     className="w-full h-[46px] bg-[#041632] hover:bg-[#1b2b48] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[13px] font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
                   >
-                    <span className="material-symbols-outlined text-[18px]">camera</span>
+                    <span className="material-symbols-outlined notranslate text-[18px]" translate="no">camera</span>
                     Capturar foto
                   </button>
                 )}
@@ -520,7 +522,8 @@ export default function CheckIn() {
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-[20px]"
+                  <span className="material-symbols-outlined notranslate text-[20px]"
+                    translate="no"
                     style={{ fontVariationSettings: "'FILL' 1" }}>how_to_reg</span>
                   {photo ? 'Confirmar y registrar entrada' : 'Toma la foto para continuar'}
                 </>
@@ -545,7 +548,7 @@ export default function CheckIn() {
   )
 }
 
-// ── Componentes auxiliares ────────────────────────────────────────────────────
+// ── Componentes auxiliares ────────────────────────────────────────────────----
 
 function StepDot({ n, label, active, done }) {
   return (
@@ -555,7 +558,7 @@ function StepDot({ n, label, active, done }) {
         active ? 'bg-[#041632] text-white' :
                  'bg-[#e0e3e5] text-[#75777e]'
       }`}>
-        {done ? <span className="material-symbols-outlined text-[14px]">check</span> : n}
+        {done ? <span className="material-symbols-outlined notranslate text-[14px]" translate="no">check</span> : n}
       </div>
       <span className={`text-[12px] font-medium hidden sm:inline ${active ? 'text-[#041632]' : 'text-[#75777e]'}`}>
         {label}
@@ -568,7 +571,7 @@ function InfoField({ label, value, icon, mono = false }) {
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-1 text-[#75777e]">
-        <span className="material-symbols-outlined text-[14px]">{icon}</span>
+        <span className="material-symbols-outlined notranslate text-[14px]" translate="no">{icon}</span>
         <span className="text-[11px] font-semibold uppercase tracking-wide">{label}</span>
       </div>
       <p className={`text-[#041632] text-[14px] font-semibold ${mono ? 'font-mono' : ''}`}>{value}</p>

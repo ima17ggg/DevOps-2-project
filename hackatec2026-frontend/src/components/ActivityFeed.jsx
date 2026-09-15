@@ -17,11 +17,11 @@ function CheckInItem({ item }) {
       {item.photo ? (
         <img
           alt={`Foto de verificación de ${item.name}`}
-          className="w-12 h-12 rounded-lg object-cover border border-outline-variant bg-surface-dim"
+          className="w-12 h-12 rounded-lg object-cover border border-outline-variant bg-surface-dim shrink-0"
           src={item.photo}
         />
       ) : (
-        <div className="w-12 h-12 rounded-lg border border-outline-variant bg-surface-dim flex items-center justify-center text-outline">
+        <div className="w-12 h-12 rounded-lg border border-outline-variant bg-surface-dim flex items-center justify-center text-outline shrink-0">
           <span className="material-symbols-outlined">person</span>
         </div>
       )}
@@ -66,15 +66,22 @@ export default function ActivityFeed() {
         <h3 className="font-headline-sm text-headline-sm text-primary">Recent Check-ins</h3>
         <span className="font-label-md text-label-md text-on-surface-variant">{checkIns.length}</span>
       </div>
+
       <div className="flex-1 overflow-y-auto p-sm flex flex-col gap-xs">
-        {checkIns.length ? checkIns.map((item) => (
-          <CheckInItem key={item.id} item={item} />
-        )) : (
+        {checkIns.length ? (
+          checkIns.map((item) => <CheckInItem key={item.id} item={item} />)
+        ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center px-md text-on-surface-variant">
             <span className="material-symbols-outlined text-[32px] mb-xs">event_available</span>
             <p className="font-label-md text-label-md">Aún no hay entradas registradas.</p>
           </div>
         )}
+      </div>
+
+      <div className="p-sm border-t border-outline-variant bg-surface-container-lowest text-center">
+        <button className="font-label-md text-label-md text-primary hover:text-primary-container transition-colors cursor-pointer">
+          View All Activity
+        </button>
       </div>
     </div>
   )

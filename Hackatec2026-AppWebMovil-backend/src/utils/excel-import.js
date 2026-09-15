@@ -1,9 +1,14 @@
 import { v4 as uuidv4 } from 'uuid';
+<<<<<<< HEAD
+=======
 import ExcelJS from 'exceljs';
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
 import { supabase } from './supabase.js';
 
 const ID_ROL_DEFAULT = 1;
 
+<<<<<<< HEAD
+=======
 // Convierte el buffer de un .xlsx/.xls en un arreglo de objetos usando la
 // primera fila como encabezados (correo, nombre, apellido_paterno, rfc,
 // codigo_empleado, etc.). Los encabezados se normalizan a minúsculas y sin
@@ -50,6 +55,7 @@ export async function parseExcelBuffer(buffer) {
   return rows;
 }
 
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
 export async function importEmployeesFromRows(rows, dryRun = false) {
   const results = {
     success: [],
@@ -120,4 +126,8 @@ export async function importEmployeesFromRows(rows, dryRun = false) {
   }
 
   return results;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10

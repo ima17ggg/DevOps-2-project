@@ -15,7 +15,6 @@
     "qrcode": "^1.5.4",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-native-background-geolocation": "^5.1.1",
     "react-router-dom": "^7.9.4"
   },
   "devDependencies": {

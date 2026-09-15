@@ -85,9 +85,9 @@ export default function MapModule() {
     if (mapRef.current || !mapDivRef.current) return
 
     const map = L.map(mapDivRef.current, {
-      center:             [PLANT_CENTER.lat, PLANT_CENTER.lng],
-      zoom:               13,
-      zoomControl:        true,
+      center:              [PLANT_CENTER.lat, PLANT_CENTER.lng],
+      zoom:                13,
+      zoomControl:         true,
       attributionControl: true,
     })
 
@@ -107,7 +107,7 @@ export default function MapModule() {
       plantMarkersRef.current = {}
       plantCirclesRef.current = {}
     }
-  }, []) // eslint-disable-line
+  }, [refresh, loadPlants])
 
   useEffect(() => {
     const id = setInterval(refresh, REFRESH_MS)
@@ -153,7 +153,7 @@ export default function MapModule() {
     else if (bounds.length === 1) map.setView(bounds[0], 15)
   }, [plants])
 
-  // Pinta los empleados (locations) — sin cambios respecto a antes
+  // Pinta los empleados (locations)
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
@@ -203,7 +203,7 @@ export default function MapModule() {
         <div className="flex gap-sm">
           <button
             onClick={refresh}
-            className="text-label-md font-label-md px-md py-xs bg-surface-container-lowest border border-outline-variant rounded-full text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-xs shadow-sm"
+            className="text-label-md font-label-md px-md py-xs bg-surface-container-lowest border border-outline-variant rounded-full text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-xs shadow-sm cursor-pointer"
           >
             <span className="material-symbols-outlined text-[14px]">refresh</span>
             Refresh

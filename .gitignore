@@ -1,3 +1,11 @@
+<<<<<<< HEAD
+node_modules/
+.env
+.env.local
+dist/
+build/
+.DS_Store
+=======
 .vs
 
 Hackatec2026-frontend.slnx
@@ -11,3 +19,4 @@ hackatec2026-frontend.worktrees
 hackatec2026-AppWebMovil-backend/.env
 
 hackatec2026-AppWebMovil-backend/node_modules
+>>>>>>> c6ff33a76164ec989520315e224f2a0954ebeb10
