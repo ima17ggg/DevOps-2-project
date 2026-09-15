@@ -5,7 +5,13 @@ export async function getAllPlants() {
     const res = await fetch(`${API_BASE}/plantas`, { credentials: 'include' })
     if (!res.ok) return []
     const json = await res.json()
-    return json?.success && Array.isArray(json.data) ? json.data : []
+    const rows = json?.success && Array.isArray(json.data) ? json.data : []
+
+    return rows.map((p) => ({
+      ...p,
+      lat: p.latitud != null ? Number(p.latitud) : null,
+      lng: p.longitud != null ? Number(p.longitud) : null,
+    }))
   } catch {
     return []
   }
