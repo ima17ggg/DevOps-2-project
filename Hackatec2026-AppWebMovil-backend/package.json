@@ -15,6 +15,7 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "multer": "^1.4.5-lts.1",
+    "nodemailer": "^10.0.10",
     "pg": "^8.21.0",
     "qrcode": "^1.5.3",
     "qs": "^6.16.0",
