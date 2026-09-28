@@ -14,6 +14,21 @@ async function fetchEmployees() {
   return json.data
 }
 
+/** Chip de resumen (ícono + etiqueta + valor) usado en la tarjeta de QR generado. */
+function SummaryChip({ icon, label, value }) {
+  return (
+    <div className="flex items-center gap-2 bg-[#f7f9fb] border border-[#e0e3e5] rounded-lg px-3 py-2">
+      <span translate="no" className="material-symbols-outlined notranslate text-[#964900] text-[16px] shrink-0">
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <p className="text-[9px] uppercase tracking-wide text-[#75777e] font-semibold leading-none">{label}</p>
+        <p className="text-[12px] text-[#041632] font-bold truncate leading-tight mt-0.5">{value}</p>
+      </div>
+    </div>
+  )
+}
+
 /** Calcula la diferencia entre dos strings HH:MM. Devuelve texto legible. */
 function calcDuration(start, end) {
   if (!start || !end) return null
@@ -39,6 +54,7 @@ export default function QRGenerate() {
   const [date,        setDate]        = useState(() => new Date().toISOString().slice(0, 10))
   const [search,      setSearch]      = useState('')
   const [plantFilter, setPlantFilter] = useState('Todas')
+  const [assignedPlant, setAssignedPlant] = useState('')
 
   // ── Estado del catálogo de empleados (real, desde el backend) ───────────
   const [employees,        setEmployees]        = useState([])
@@ -82,6 +98,16 @@ export default function QRGenerate() {
     return ['Todas', ...unique]
   }, [employees])
 
+  // Planta asignada al QR: lista sin la opción "Todas" (aquí sí se necesita una planta concreta)
+  const ASSIGNABLE_PLANTS = useMemo(() => PLANTS.filter(p => p !== 'Todas'), [PLANTS])
+
+  // Preselecciona la primera planta disponible en cuanto se cargan los empleados
+  useEffect(() => {
+    if (!assignedPlant && ASSIGNABLE_PLANTS.length > 0) {
+      setAssignedPlant(ASSIGNABLE_PLANTS[0])
+    }
+  }, [ASSIGNABLE_PLANTS, assignedPlant])
+
   // ── Filtrado de empleados ────────────────────────────────────────────────
   const filtered = employees.filter(e => {
     const matchPlant  = plantFilter === 'Todas' || e.plant === plantFilter
@@ -111,13 +137,14 @@ export default function QRGenerate() {
 
   // ── Generar QR ───────────────────────────────────────────────────────────
   async function handleGenerate() {
-    if (selectedIds.length === 0 || !startTime || !endTime) return
+    if (selectedIds.length === 0 || !startTime || !endTime || !assignedPlant) return
     setGenerating(true)
 
     const newSession = createQRSession({
       employeeIds: selectedIds,
       date,
       shift: `${startTime} – ${endTime}`,
+      plant: assignedPlant,
     })
 
     const checkInUrl = `${window.location.origin}/checkin?session=${newSession.token}`
@@ -175,6 +202,7 @@ export default function QRGenerate() {
     setSession(null)
     setQrDataUrl('')
     setSelectedIds([])
+    setAssignedPlant(ASSIGNABLE_PLANTS[0] ?? '')
   }
 
   const duration = calcDuration(startTime, endTime)
@@ -189,12 +217,12 @@ export default function QRGenerate() {
             onClick={() => navigate('/dashboard')}
             className="flex items-center gap-1.5 text-[#041632] text-[13px] font-semibold hover:text-[#964900] transition-colors cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+            <span translate="no" className="material-symbols-outlined notranslate text-[18px]">arrow_back</span>
             Dashboard
           </button>
           <div className="h-5 w-px bg-[#e0e3e5]" />
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#964900] text-[20px]">qr_code_2</span>
+            <span translate="no" className="material-symbols-outlined notranslate text-[#964900] text-[20px]">qr_code_2</span>
             <div>
               <p className="text-[#041632] text-[13px] font-bold leading-none">Generar Pase QR</p>
               <p className="text-[#75777e] text-[11px] mt-0.5">Plant Alpha-4 · Acceso de turno</p>
@@ -207,7 +235,7 @@ export default function QRGenerate() {
             onClick={handleNewQR}
             className="flex items-center gap-1.5 text-[13px] font-semibold px-4 py-1.5 border border-[#c5c6ce] rounded-lg bg-white hover:bg-[#f2f4f6] text-[#041632] transition-colors cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[16px]">add</span>
+            <span translate="no" className="material-symbols-outlined notranslate text-[16px]">add</span>
             Nuevo QR
           </button>
         )}
@@ -226,7 +254,7 @@ export default function QRGenerate() {
             </div>
             {selectedIds.length > 0 && (
               <span className="flex items-center gap-1.5 bg-[#041632] text-white text-[12px] font-bold px-3 py-1 rounded-full">
-                <span className="material-symbols-outlined text-[14px]">group</span>
+                <span translate="no" className="material-symbols-outlined notranslate text-[14px]">group</span>
                 {selectedIds.length} seleccionado{selectedIds.length !== 1 ? 's' : ''}
               </span>
             )}
@@ -235,7 +263,7 @@ export default function QRGenerate() {
           {/* Filtros */}
           <div className="flex gap-2.5">
             <div className="flex-1 relative">
-              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[#75777e] text-[17px]">
+              <span translate="no" className="material-symbols-outlined notranslate absolute left-2.5 top-1/2 -translate-y-1/2 text-[#75777e] text-[17px]">
                 search
               </span>
               <input
@@ -321,7 +349,7 @@ export default function QRGenerate() {
               {/* Fecha */}
               <div className="bg-white border border-[#e0e3e5] rounded-2xl shadow-sm p-5 flex flex-col gap-3">
                 <label className="flex items-center gap-2 text-[#041632] text-[13px] font-bold">
-                  <span className="material-symbols-outlined text-[18px]">calendar_today</span>
+                  <span translate="no" className="material-symbols-outlined notranslate text-[18px]">calendar_today</span>
                   Fecha de acceso
                 </label>
                 <input
@@ -335,7 +363,7 @@ export default function QRGenerate() {
               {/* Horario */}
               <div className="bg-white border border-[#e0e3e5] rounded-2xl shadow-sm p-5 flex flex-col gap-4">
                 <p className="text-[#041632] text-[13px] font-bold flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[18px]">schedule</span>
+                  <span translate="no" className="material-symbols-outlined notranslate text-[18px]">schedule</span>
                   Horario de turno
                 </p>
                 <div className="grid grid-cols-2 gap-3">
@@ -365,10 +393,30 @@ export default function QRGenerate() {
                 )}
               </div>
 
+              {/* Planta asignada */}
+              <div className="bg-white border border-[#e0e3e5] rounded-2xl shadow-sm p-5 flex flex-col gap-3">
+                <label className="flex items-center gap-2 text-[#041632] text-[13px] font-bold">
+                  <span translate="no" className="material-symbols-outlined notranslate text-[18px]">factory</span>
+                  Planta asignada
+                </label>
+                <select
+                  value={assignedPlant}
+                  onChange={e => setAssignedPlant(e.target.value)}
+                  disabled={loadingEmployees || !!employeesError || ASSIGNABLE_PLANTS.length === 0}
+                  className="h-10 border border-[#c5c6ce] rounded-lg px-3 text-[14px] text-[#041632] focus:outline-none focus:border-[#041632] bg-[#f7f9fb] cursor-pointer disabled:opacity-50"
+                >
+                  {ASSIGNABLE_PLANTS.length === 0 && <option value="">Sin plantas disponibles</option>}
+                  {ASSIGNABLE_PLANTS.map(p => <option key={p} value={p}>{p}</option>)}
+                </select>
+                <p className="text-[11px] text-[#75777e]">
+                  El pase QR quedará vinculado a esta planta para validar el acceso.
+                </p>
+              </div>
+
               {/* Botón Generar */}
               <button
                 onClick={handleGenerate}
-                disabled={selectedIds.length === 0 || generating}
+                disabled={selectedIds.length === 0 || !assignedPlant || generating}
                 className="w-full h-11 bg-[#041632] text-white rounded-xl text-[13px] font-bold hover:bg-[#1b2b48] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md cursor-pointer flex items-center justify-center gap-2"
               >
                 {generating ? 'Generando...' : `Generar Código QR (${selectedIds.length})`}
@@ -376,12 +424,53 @@ export default function QRGenerate() {
             </>
           ) : (
             /* ── Vista del QR Generado ── */
-            <div className="bg-white border border-[#e0e3e5] rounded-2xl shadow-sm p-5 flex flex-col items-center text-center gap-4">
-              <h3 className="text-[#041632] text-[15px] font-bold">¡Pase QR Generado!</h3>
-              {qrDataUrl && <img src={qrDataUrl} alt="Código QR" className="w-56 h-56 object-contain border p-2 rounded-xl" />}
-              <div className="flex gap-2 w-full">
-                <button onClick={handleDownload} className="flex-1 bg-[#041632] text-white py-2 rounded-lg text-[12px] font-bold">Descargar</button>
-                <button onClick={handleCopyUrl} className="flex-1 border py-2 rounded-lg text-[12px] font-bold">{copied ? '¡Copiado!' : 'Copiar Link'}</button>
+            <div className="bg-white border border-[#e0e3e5] rounded-2xl shadow-md overflow-hidden">
+              {/* Encabezado */}
+              <div className="bg-[#041632] px-5 py-4 flex items-center gap-2.5">
+                <span translate="no" className="material-symbols-outlined notranslate text-[#fc820c] text-[22px]">
+                  task_alt
+                </span>
+                <div>
+                  <h3 className="text-white text-[14px] font-bold leading-none">¡Pase QR Generado!</h3>
+                  <p className="text-[#b7c8e1] text-[11px] mt-1">Listo para compartir o imprimir</p>
+                </div>
+              </div>
+
+              <div className="p-5 flex flex-col items-center text-center gap-4">
+                {qrDataUrl && (
+                  <img
+                    src={qrDataUrl}
+                    alt="Código QR"
+                    className="w-56 h-56 object-contain border border-[#e0e3e5] p-2 rounded-xl"
+                  />
+                )}
+
+                {/* Resumen del turno */}
+                <div className="w-full grid grid-cols-2 gap-2 text-left">
+                  <SummaryChip icon="factory" label="Planta" value={session?.plant || '—'} />
+                  <SummaryChip icon="group" label="Empleados" value={session?.employeeIds?.length ?? selectedIds.length} />
+                  <SummaryChip icon="calendar_today" label="Fecha" value={session?.date || date} />
+                  <SummaryChip icon="schedule" label="Turno" value={session?.shift || `${startTime} – ${endTime}`} />
+                </div>
+
+                <div className="flex gap-2 w-full">
+                  <button
+                    onClick={handleDownload}
+                    className="flex-1 bg-[#041632] text-white py-2.5 rounded-lg text-[12px] font-bold hover:bg-[#1b2b48] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span translate="no" className="material-symbols-outlined notranslate text-[16px]">download</span>
+                    Descargar
+                  </button>
+                  <button
+                    onClick={handleCopyUrl}
+                    className="flex-1 border border-[#c5c6ce] py-2.5 rounded-lg text-[12px] font-bold hover:bg-[#f2f4f6] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span translate="no" className="material-symbols-outlined notranslate text-[16px]">
+                      {copied ? 'check' : 'link'}
+                    </span>
+                    {copied ? '¡Copiado!' : 'Copiar Link'}
+                  </button>
+                </div>
               </div>
             </div>
           )}

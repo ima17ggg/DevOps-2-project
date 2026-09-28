@@ -22,7 +22,7 @@ function CheckInItem({ item }) {
         />
       ) : (
         <div className="w-12 h-12 rounded-lg border border-outline-variant bg-surface-dim flex items-center justify-center text-outline shrink-0">
-          <span className="material-symbols-outlined">person</span>
+          <span translate="no" className="material-symbols-outlined notranslate">person</span>
         </div>
       )}
       <div className="flex-1 min-w-0">
@@ -35,7 +35,7 @@ function CheckInItem({ item }) {
         </p>
         <p className="font-body-md text-body-md text-on-surface-variant truncate">{item.location}</p>
         <span className="inline-flex items-center gap-xs mt-xs text-label-md font-label-md text-[#15803d] bg-[#dcfce7] rounded-full px-sm py-[2px]">
-          <span className="material-symbols-outlined text-[14px]">verified</span>
+          <span translate="no" className="material-symbols-outlined notranslate text-[14px]">verified</span>
           Entrada registrada
         </span>
       </div>
@@ -72,7 +72,7 @@ export default function ActivityFeed() {
           checkIns.map((item) => <CheckInItem key={item.id} item={item} />)
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center px-md text-on-surface-variant">
-            <span className="material-symbols-outlined text-[32px] mb-xs">event_available</span>
+            <span translate="no" className="material-symbols-outlined notranslate text-[32px] mb-xs">event_available</span>
             <p className="font-label-md text-label-md">Aún no hay entradas registradas.</p>
           </div>
         )}

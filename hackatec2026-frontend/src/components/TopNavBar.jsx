@@ -4,7 +4,7 @@ export default function TopNavBar() {
       <div className="flex items-center gap-xl flex-1">
         <span className="font-headline-sm text-headline-sm font-black text-primary">Workforce Manager</span>
         <div className="relative w-64">
-          <span className="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-outline">
+          <span translate="no" className="material-symbols-outlined notranslate absolute left-sm top-1/2 -translate-y-1/2 text-outline">
             search
           </span>
           <input
@@ -17,10 +17,10 @@ export default function TopNavBar() {
 
       <div className="flex items-center gap-md">
         <button className="text-on-surface-variant hover:text-secondary-container transition-colors p-xs rounded-full hover:bg-surface-container-high">
-          <span className="material-symbols-outlined">notifications</span>
+          <span translate="no" className="material-symbols-outlined notranslate">notifications</span>
         </button>
         <button className="text-on-surface-variant hover:text-secondary-container transition-colors p-xs rounded-full hover:bg-surface-container-high">
-          <span className="material-symbols-outlined">help_outline</span>
+          <span translate="no" className="material-symbols-outlined notranslate">help_outline</span>
         </button>
         <button className="border border-primary text-primary font-label-md text-label-md py-xs px-md rounded-lg hover:bg-surface-container transition-colors ml-sm">
           Search Records

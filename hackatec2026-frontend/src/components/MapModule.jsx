@@ -51,7 +51,7 @@ function buildPlantIcon() {
     html: `<div style="width:32px;height:32px;background:#041632;border:3px solid white;
       border-radius:8px;display:flex;align-items:center;justify-content:center;
       box-shadow:0 2px 8px rgba(0,0,0,0.4);">
-      <span style="color:white;font-size:16px;line-height:1;" class="material-symbols-outlined">factory</span>
+      <span translate="no" style="color:white;font-size:16px;line-height:1;" class="material-symbols-outlined notranslate">factory</span>
     </div>`,
   })
 }
@@ -225,7 +225,7 @@ export default function MapModule() {
             onClick={refresh}
             className="text-label-md font-label-md px-md py-xs bg-surface-container-lowest border border-outline-variant rounded-full text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-xs shadow-sm cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[14px]">refresh</span>
+            <span translate="no" className="material-symbols-outlined notranslate text-[14px]">refresh</span>
             Refresh
           </button>
         </div>
@@ -253,7 +253,7 @@ export default function MapModule() {
         </div>
 
         <div className="absolute bottom-sm right-sm bg-white/90 border border-outline-variant px-sm py-xs rounded-full text-label-md text-on-surface-variant z-[1000] flex items-center gap-xs">
-          <span className="material-symbols-outlined text-[12px]">schedule</span>
+          <span translate="no" className="material-symbols-outlined notranslate text-[12px]">schedule</span>
           Actualiza cada 3 min · {total} empleados · {plants.length} plantas
         </div>
       </div>

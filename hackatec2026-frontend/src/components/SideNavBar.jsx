@@ -42,7 +42,7 @@ export default function SideNavBar() {
           onClick={() => navigate('/qr-generate')}
           className="w-full bg-secondary-container text-on-secondary font-label-lg text-label-lg py-sm px-md rounded-full flex items-center justify-center gap-sm hover:opacity-90 transition-opacity shadow-sm cursor-pointer"
         >
-          <span className="material-symbols-outlined text-[18px]">qr_code_scanner</span>
+          <span translate="no" className="material-symbols-outlined notranslate text-[18px]">qr_code_scanner</span>
           QR Registration
         </button>
       </div>
@@ -61,7 +61,7 @@ export default function SideNavBar() {
                 }`
               }
             >
-              <span className="material-symbols-outlined">{item.icon}</span>
+              <span translate="no" className="material-symbols-outlined notranslate">{item.icon}</span>
               <span className="font-label-lg text-label-lg">{item.label}</span>
             </NavLink>
           </li>

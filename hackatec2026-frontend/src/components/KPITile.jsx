@@ -5,7 +5,7 @@ export default function KPITile({ label, icon, iconColor, value, trend }) {
         <span className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
           {label}
         </span>
-        <span className={`material-symbols-outlined text-[20px] ${iconColor ?? 'text-outline'}`}>
+        <span translate="no" className={`material-symbols-outlined notranslate text-[20px] ${iconColor ?? 'text-outline'}`}>
           {icon}
         </span>
       </div>
@@ -16,7 +16,7 @@ export default function KPITile({ label, icon, iconColor, value, trend }) {
         {trend?.dot ? (
           <span className={`w-1.5 h-1.5 rounded-full ${trend.dot}`}></span>
         ) : trend?.trendIcon ? (
-          <span className="material-symbols-outlined text-[16px]">
+          <span translate="no" className="material-symbols-outlined notranslate text-[16px]">
             {trend.trendIcon}
           </span>
         ) : null}

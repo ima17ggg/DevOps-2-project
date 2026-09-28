@@ -131,7 +131,7 @@ export default function Checkout() {
     return (
       <div className="min-h-screen bg-[#f7f9fb] flex flex-col items-center justify-center gap-5 px-6 py-10">
         <div className="w-20 h-20 rounded-full bg-[#fff7ed] flex items-center justify-center">
-          <span className="material-symbols-outlined text-[#964900] text-[44px]"
+          <span translate="no" className="material-symbols-outlined notranslate text-[#964900] text-[44px]"
             style={{ fontVariationSettings: "'FILL' 1" }}>
             exit_to_app
           </span>
@@ -216,7 +216,7 @@ export default function Checkout() {
             onClick={() => { stopCamera(); navigate('/chekin') }}
             className="flex items-center gap-1.5 text-[#041632] text-[13px] font-semibold hover:text-[#964900] transition-colors cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+            <span translate="no" className="material-symbols-outlined notranslate text-[18px]">arrow_back</span>
             Regresar
           </button>
           <div className="h-5 w-px bg-[#e0e3e5]" />
@@ -251,7 +251,7 @@ export default function Checkout() {
                style={{ aspectRatio: '4/3' }}>
             {cameraError ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
-                <span className="material-symbols-outlined text-[#fc820c] text-[40px]">videocam_off</span>
+                <span translate="no" className="material-symbols-outlined notranslate text-[#fc820c] text-[40px]">videocam_off</span>
                 <p className="text-white text-[13px]">{cameraError}</p>
                 <button onClick={() => startCamera('environment')}
                   className="px-4 py-2 bg-[#964900] text-white text-[12px] font-semibold rounded-lg cursor-pointer hover:bg-[#7d3d00] transition-colors">
@@ -286,7 +286,7 @@ export default function Checkout() {
             disabled={!!cameraError}
             className="h-[50px] px-10 bg-[#964900] hover:bg-[#7d3d00] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-bold rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer shadow-md"
           >
-            <span className="material-symbols-outlined text-[20px]">qr_code_scanner</span>
+            <span translate="no" className="material-symbols-outlined notranslate text-[20px]">qr_code_scanner</span>
             QR Detectado — Continuar
           </button>
           <p className="text-[#75777e] text-[12px]">
@@ -306,7 +306,7 @@ export default function Checkout() {
             <div className="bg-white border border-[#e0e3e5] rounded-2xl shadow-sm overflow-hidden">
               <div className="bg-[#041632] px-5 py-4 flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-[#1b2b48] border-2 border-[#fc820c]/40 flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-[#b7c8e1] text-[28px]"
+                  <span translate="no" className="material-symbols-outlined notranslate text-[#b7c8e1] text-[28px]"
                     style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -352,7 +352,7 @@ export default function Checkout() {
                             : 'bg-white text-[#041632] border-[#c5c6ce] hover:border-[#041632]'
                         }`}
                       >
-                        <span className="material-symbols-outlined text-[14px]">{tag.icon}</span>
+                        <span translate="no" className="material-symbols-outlined notranslate text-[14px]">{tag.icon}</span>
                         {tag.label}
                       </button>
                     )
@@ -386,7 +386,7 @@ export default function Checkout() {
                 {/* Indicador de validación */}
                 {!canSubmit && (selectedTags.length > 0 || description.length > 0) && !photo && (
                   <p className="text-[#964900] text-[12px] font-medium flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">info</span>
+                    <span translate="no" className="material-symbols-outlined notranslate text-[14px]">info</span>
                     Falta capturar la foto de salida →
                   </p>
                 )}
@@ -398,11 +398,11 @@ export default function Checkout() {
           <div className="flex flex-col gap-4">
             <div className="bg-white border border-[#e0e3e5] rounded-2xl shadow-sm overflow-hidden flex flex-col">
               <div className="px-5 py-4 border-b border-[#e0e3e5] flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#041632] text-[20px]">photo_camera</span>
+                <span translate="no" className="material-symbols-outlined notranslate text-[#041632] text-[20px]">photo_camera</span>
                 <h2 className="text-[#041632] text-[15px] font-bold">Foto de salida</h2>
                 {photo && (
                   <span className="ml-auto text-[#15803d] text-[11px] font-semibold flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]"
+                    <span translate="no" className="material-symbols-outlined notranslate text-[14px]"
                       style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                     Capturada
                   </span>
@@ -417,7 +417,7 @@ export default function Checkout() {
                     <img src={photo} alt="Foto de salida" className="w-full h-full object-cover" />
                   ) : cameraError ? (
                     <div className="flex flex-col items-center gap-2 p-6 text-center">
-                      <span className="material-symbols-outlined text-[#fc820c] text-[36px]">videocam_off</span>
+                      <span translate="no" className="material-symbols-outlined notranslate text-[#fc820c] text-[36px]">videocam_off</span>
                       <p className="text-white text-[12px]">{cameraError}</p>
                     </div>
                   ) : (
@@ -433,13 +433,13 @@ export default function Checkout() {
                 {photo ? (
                   <button onClick={retakePhoto}
                     className="w-full h-[44px] border border-[#c5c6ce] bg-white hover:bg-[#f2f4f6] text-[#041632] text-[13px] font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer">
-                    <span className="material-symbols-outlined text-[18px]">replay</span>
+                    <span translate="no" className="material-symbols-outlined notranslate text-[18px]">replay</span>
                     Tomar de nuevo
                   </button>
                 ) : (
                   <button onClick={capturePhoto} disabled={!!cameraError}
                     className="w-full h-[46px] bg-[#041632] hover:bg-[#1b2b48] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[13px] font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer">
-                    <span className="material-symbols-outlined text-[18px]">camera</span>
+                    <span translate="no" className="material-symbols-outlined notranslate text-[18px]">camera</span>
                     Capturar foto de salida
                   </button>
                 )}
@@ -452,7 +452,7 @@ export default function Checkout() {
 
             {/* Hora actual */}
             <div className="bg-white border border-[#e0e3e5] rounded-2xl shadow-sm px-5 py-4 flex items-center gap-3">
-              <span className="material-symbols-outlined text-[#964900] text-[22px]">schedule</span>
+              <span translate="no" className="material-symbols-outlined notranslate text-[#964900] text-[22px]">schedule</span>
               <div>
                 <p className="text-[#75777e] text-[11px] uppercase font-semibold tracking-wide">Hora de salida</p>
                 <LiveClock />
@@ -475,7 +475,7 @@ export default function Checkout() {
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-[20px]"
+                  <span translate="no" className="material-symbols-outlined notranslate text-[20px]"
                     style={{ fontVariationSettings: "'FILL' 1" }}>exit_to_app</span>
                   {canSubmit ? 'Finalizar y registrar salida' : 'Completa actividades y foto'}
                 </>
@@ -500,7 +500,7 @@ function StepDot({ n, label, active, done }) {
         active ? 'bg-[#964900] text-white' :
                  'bg-[#e0e3e5] text-[#75777e]'
       }`}>
-        {done ? <span className="material-symbols-outlined text-[14px]">check</span> : n}
+        {done ? <span translate="no" className="material-symbols-outlined notranslate text-[14px]">check</span> : n}
       </div>
       <span className={`text-[12px] font-medium hidden sm:inline ${active ? 'text-[#041632]' : 'text-[#75777e]'}`}>
         {label}
@@ -512,7 +512,7 @@ function StepDot({ n, label, active, done }) {
 function InfoChip({ icon, value }) {
   return (
     <div className="flex items-center gap-1 text-[#44474d] text-[12px]">
-      <span className="material-symbols-outlined text-[14px] text-[#75777e]">{icon}</span>
+      <span translate="no" className="material-symbols-outlined notranslate text-[14px] text-[#75777e]">{icon}</span>
       {value}
     </div>
   )
@@ -522,7 +522,7 @@ function SummaryField({ label, value, icon, accent = false }) {
   return (
     <div className="bg-[#f7f9fb] border border-[#e0e3e5] rounded-xl px-3 py-2.5">
       <div className="flex items-center gap-1 text-[#75777e] mb-0.5">
-        <span className="material-symbols-outlined text-[13px]">{icon}</span>
+        <span translate="no" className="material-symbols-outlined notranslate text-[13px]">{icon}</span>
         <span className="text-[10px] uppercase font-semibold tracking-wide">{label}</span>
       </div>
       <p className={`font-mono text-[16px] font-bold ${accent ? 'text-[#964900]' : 'text-[#041632]'}`}>{value}</p>
