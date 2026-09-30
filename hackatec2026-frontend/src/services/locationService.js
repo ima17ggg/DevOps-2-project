@@ -46,24 +46,32 @@ export async function getAllLocations() {
   let json
   try {
     const res = await fetch(`${API_BASE}/locations`, { credentials: 'include' })
-    if (!res.ok) return readStoredLocations()
+    if (!res.ok) {
+      console.warn('[locations] HTTP', res.status, await res.text())
+      return readStoredLocations()
+    }
     json = await res.json()
-  } catch {
+  } catch (err) {
+    console.warn('[locations] fetch/parse falló:', err)
     return readStoredLocations()
   }
 
-  if (!json?.success || !Array.isArray(json.data)) return readStoredLocations()
+  if (!json?.success || !Array.isArray(json.data)) {
+    console.warn('[locations] formato inesperado:', json)
+    return readStoredLocations()
+  }
 
   const locations = {}
   for (const row of json.data) {
     locations[row.id_empleado] = {
-      lat: row.latitud,
-      lng: row.longitud,
+      lat: Number(row.latitud),
+      lng: Number(row.longitud),
       name: [row.empleados?.nombre, row.empleados?.apellido_paterno].filter(Boolean).join(' '),
       role: row.empleados?.roles?.nombre || 'Empleado',
       updatedAt: row.updated_at ? new Date(row.updated_at).getTime() : Date.now(),
     }
   }
+  console.log('[locations] recibidas:', Object.keys(locations).length)
   return locations
 }
 

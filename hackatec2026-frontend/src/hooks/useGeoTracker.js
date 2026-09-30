@@ -28,7 +28,7 @@ export function useGeoTracker({ employeeId, name, role, active }) {
     const readAndSend = () => {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          sendLocation(employeeId, name, role, pos.coords.latitude, pos.coords.longitude)
+          sendLocation(employeeId, pos.coords.latitude, pos.coords.longitude)
         },
         (err) => {
           console.warn('[GeoTracker] Error al obtener posición:', err.message)
