@@ -21,6 +21,7 @@ import gpsRouter from './routes/gps.js';
 import excelRouter from './routes/excel.js';
 import dashboardRouter from './routes/dashboard.js';
 import rolesRouter from './routes/roles.js';
+import reportesRouter from './routes/reportes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -64,6 +65,7 @@ app.use('/api/qr', qrRouter); // May have public endpoints
 app.use('/api/gps', authenticateJWT, gpsRouter);
 app.use('/api/excel', authenticateJWT, excelRouter);
 app.use('/api/dashboard', authenticateJWT, dashboardRouter);
+app.use('/api/reportes', authenticateJWT, reportesRouter);
 
 // 404 handler
 app.use((req, res) => {

@@ -23,6 +23,12 @@
  *   {{checkout_time}}   — (check-out) Hora de salida
  *   {{activity_tags}}   — (check-out) Tags de actividad
  *   {{activity_desc}}   — (check-out) Descripción del trabajo
+ *   {{incident_folio}}  — (HelpDesk) Folio de la incidencia
+ *   {{incident_subject}}— (HelpDesk) Asunto reportado
+ *   {{incident_status}} — (HelpDesk) Estado actual
+ *   {{incident_priority}} — (HelpDesk) Prioridad
+ *   {{incident_movement}} — (HelpDesk) Movimiento realizado
+ *   {{incident_detail}} — (HelpDesk) Descripción o seguimiento
  */
 
 import emailjs from '@emailjs/browser'
@@ -92,6 +98,19 @@ async function sendToAll(templateParams) {
   return results
 }
 
+async function sendToRecipients(templateParams, recipients) {
+  const { serviceId, templateId, publicKey } = getEmailConfig()
+  if (!serviceId || !templateId || !publicKey) return []
+
+  const uniqueRecipients = [...new Set(recipients.filter(Boolean).map(email => email.trim().toLowerCase()))]
+  return Promise.all(uniqueRecipients.map(email => emailjs.send(
+    serviceId,
+    templateId,
+    { ...templateParams, to_email: email },
+    { publicKey }
+  )))
+}
+
 // ── Tipos de notificación ─────────────────────────────────────────────────────
 
 /**
@@ -111,6 +130,9 @@ export async function sendQRGeneratedEmail({ session, employees, qrDataUrl = '' 
 
   return sendToAll({
     to_name:        'Equipo de RH',
+    notification_title: 'Nuevo pase QR de acceso',
+    notification_body: `Planta: ${'Plant Alpha-4'}\nFecha: ${session.date}\nHorario: ${session.shift}\nEmpleados autorizados: ${employees.length}\n${employeeList}`,
+    action_url:     checkInUrl,
     plant_name:     'Plant Alpha-4',
     session_date:   session.date,
     session_hours:  session.shift,
@@ -136,6 +158,9 @@ export async function sendCheckInEmail({ employee, checkinTime }) {
 
   return sendToAll({
     to_name:        'Equipo de RH',
+    notification_title: 'Registro de entrada confirmado',
+    notification_body: `${employee.name} (${employee.id}) registró su entrada a las ${checkinTime}.`,
+    action_url:     window.location.origin,
     plant_name:     'Plant Alpha-4',
     employee_name:  employee.name,
     employee_id:    employee.id,
@@ -166,6 +191,9 @@ export async function sendCheckOutEmail({ employee, checkinTime, checkoutTime, t
 
   return sendToAll({
     to_name:        'Equipo de RH',
+    notification_title: 'Registro de salida confirmado',
+    notification_body: `${employee.name} (${employee.id}) registró su salida a las ${checkoutTime}.\n${description || 'Sin descripción de actividades.'}`,
+    action_url:     window.location.origin,
     plant_name:     'Plant Alpha-4',
     employee_name:  employee.name,
     employee_id:    employee.id,
@@ -185,6 +213,48 @@ export async function sendCheckOutEmail({ employee, checkinTime, checkoutTime, t
 }
 
 /**
+ * Notifica la creación o el seguimiento de una incidencia HelpDesk.
+ * El correo se envía al usuario y a los destinatarios configurados, sin
+ * duplicar direcciones. Si EmailJS no está configurado, se omite en silencio.
+ */
+export async function sendIncidentEmail({ incident, recipientEmail, movement, detail = '' }) {
+  const config = getEmailConfig()
+  if (config.notifications?.onIncidentUpdates === false) return []
+
+  const status = incident.estatus || incident.estado || 'Abierta'
+  const folio = incident.folio || `INC-${incident.id_incidencia}`
+  const recipients = [recipientEmail, ...(config.hrEmails || [])]
+  if (!recipients.some(Boolean)) return []
+
+  return sendToRecipients({
+    to_name: recipientEmail ? 'Usuario de HelpDesk' : 'Equipo de soporte',
+    notification_title: `Incidencia ${folio} ${movement}`,
+    notification_body: `Asunto: ${incident.asunto || incident.tipo || 'Incidencia'}\nEstado: ${status}\nPrioridad: ${incident.prioridad || 'Normal'}\nDetalle: ${detail || 'Sin detalle adicional'}`,
+    action_url: `${window.location.origin}/incidents`,
+    plant_name: incident.ubicacion || 'Industrial Ops',
+    generated_at: new Date().toLocaleString('es-MX', { dateStyle: 'full', timeStyle: 'short' }),
+    incident_folio: folio,
+    incident_subject: incident.asunto || incident.tipo || 'Incidencia',
+    incident_type: incident.tipo || 'Sin categoría',
+    incident_status: status,
+    incident_priority: incident.prioridad || 'Normal',
+    incident_movement: movement,
+    incident_detail: detail || 'Sin detalle adicional',
+    activity_desc: `${folio} · ${movement}. ${detail || ''}`.trim(),
+    employee_name: recipientEmail || 'Usuario de HelpDesk',
+    session_date: new Date().toLocaleDateString('es-MX'),
+    session_hours: '',
+    duration: '',
+    employee_count: '',
+    employee_list: '',
+    checkin_url: `${window.location.origin}/incidents`,
+    checkin_time: '',
+    checkout_time: '',
+    activity_tags: `HelpDesk, ${status}, ${incident.prioridad || 'Normal'}`,
+  }, recipients)
+}
+
+/**
  * Envía un correo de prueba para verificar la configuración.
  */
 export async function sendTestEmail() {
@@ -199,6 +269,9 @@ export async function sendTestEmail() {
     {
       to_email:       hrEmails[0],
       to_name:        'Equipo de RH',
+      notification_title: 'Correo de prueba de Industrial Ops',
+      notification_body: 'La configuración de EmailJS funciona correctamente.',
+      action_url:     window.location.origin,
       plant_name:     'Plant Alpha-4 (TEST)',
       session_date:   new Date().toLocaleDateString('es-MX'),
       session_hours:  '07:00 – 15:00',

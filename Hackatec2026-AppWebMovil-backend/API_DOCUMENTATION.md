@@ -106,11 +106,19 @@ curl -H "Authorization: Bearer YOUR_SUPABASE_JWT_TOKEN" http://localhost:3000/ap
 - `DELETE /api/codigos-qr/:id` - Delete QR code
 
 #### Incidencias (Incidents)
-- `GET /api/incidencias` - List all incidents
-- `GET /api/incidencias/:id` - Get incident by ID
-- `POST /api/incidencias` - Create incident
-- `PUT /api/incidencias/:id` - Update incident
-- `DELETE /api/incidencias/:id` - Delete incident
+- `GET /api/incidencias` - List incidents owned by the authenticated user
+- `GET /api/incidencias/:id` - Get an owned incident with its follow-up history
+- `POST /api/incidencias` - Create an incident for the authenticated user
+- `POST /api/incidencias/:id/seguimientos` - Add a follow-up comment to an owned incident
+
+Before using these endpoints, run `database/001_helpdesk_incidencias.sql`
+once in the Supabase SQL Editor.
+
+#### Control de bitácora en Reportes
+- `GET /api/reportes` - Dashboard y bitácora filtrada por rango de fechas
+- `GET /api/reportes/incidencias/:id` - Detail and full incident history
+- `PATCH /api/reportes/incidencias/:id` - Update status/priority and audit the change
+- `POST /api/reportes/incidencias/:id/seguimientos` - Add an operational follow-up
 
 #### Notificaciones (Notifications)
 - `GET /api/notificaciones` - List all notifications

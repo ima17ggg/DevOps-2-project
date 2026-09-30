@@ -5,15 +5,12 @@ import { getEmailConfig, saveEmailConfig, sendTestEmail } from '../services/emai
 // ── Plantilla de EmailJS lista para copiar ────────────────────────────────────
 const EMAIL_TEMPLATE = `Hola {{to_name}},
 
-Se ha generado un nuevo pase QR de acceso para {{plant_name}}.
+{{notification_title}}
 
-📅 Fecha: {{session_date}}
-⏰ Horario: {{session_hours}} ({{duration}})
-👥 Empleados autorizados ({{employee_count}}):
-{{employee_list}}
+{{notification_body}}
 
-🔗 URL de check-in:
-{{checkin_url}}
+Consulta el detalle aquí:
+{{action_url}}
 
 Generado el: {{generated_at}}
 
@@ -23,6 +20,9 @@ Sistema Industrial Ops — Notificación automática`
 const TEMPLATE_VARS = [
   { v: '{{to_email}}',     desc: 'Correo del destinatario' },
   { v: '{{to_name}}',        desc: 'Nombre del destinatario' },
+  { v: '{{notification_title}}', desc: 'Título de la notificación' },
+  { v: '{{notification_body}}', desc: 'Contenido de la notificación' },
+  { v: '{{action_url}}', desc: 'Enlace relacionado con el evento' },
   { v: '{{plant_name}}',     desc: 'Nombre de la planta' },
   { v: '{{session_date}}',   desc: 'Fecha del turno' },
   { v: '{{session_hours}}',  desc: 'Horario (07:00 – 15:00)' },
@@ -36,6 +36,12 @@ const TEMPLATE_VARS = [
   { v: '{{checkout_time}}',  desc: 'Hora de salida del empleado' },
   { v: '{{activity_tags}}',  desc: 'Tags de actividad (check-out)' },
   { v: '{{activity_desc}}',  desc: 'Descripción de actividad (check-out)' },
+  { v: '{{incident_folio}}', desc: 'Folio de incidencia HelpDesk' },
+  { v: '{{incident_subject}}', desc: 'Asunto de la incidencia' },
+  { v: '{{incident_status}}', desc: 'Estado de la incidencia' },
+  { v: '{{incident_priority}}', desc: 'Prioridad de la incidencia' },
+  { v: '{{incident_movement}}', desc: 'Movimiento: registrada o actualizada' },
+  { v: '{{incident_detail}}', desc: 'Descripción o seguimiento' },
 ]
 
 export default function NotificationSettings() {
@@ -52,6 +58,7 @@ export default function NotificationSettings() {
     onQRGenerated: saved.notifications?.onQRGenerated ?? true,
     onCheckIn:     saved.notifications?.onCheckIn     ?? false,
     onCheckOut:    saved.notifications?.onCheckOut    ?? false,
+    onIncidentUpdates: saved.notifications?.onIncidentUpdates ?? true,
   })
 
   // ── Estado UI ────────────────────────────────────────────────────────────
@@ -212,6 +219,14 @@ export default function NotificationSettings() {
               checked={notifications.onCheckOut}
               onChange={v => setNotifications(n => ({ ...n, onCheckOut: v }))}
               accent="#964900"
+            />
+            <Toggle
+              icon="support_agent"
+              label="Incidencias HelpDesk"
+              description="Se notifica al usuario y a soporte cuando se registra una incidencia o se agrega seguimiento."
+              checked={notifications.onIncidentUpdates}
+              onChange={v => setNotifications(n => ({ ...n, onIncidentUpdates: v }))}
+              accent="#6d28d9"
             />
           </div>
         </Card>

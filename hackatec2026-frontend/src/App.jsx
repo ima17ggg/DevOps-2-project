@@ -14,6 +14,7 @@ import Employees from './Pages/Employees'
 import Reports from './Pages/Reportes'
 import QRGenerate from './Pages/QRGenerate'
 import NotificationSettings from './Pages/NotificationSettings'
+import Incidencias from './Pages/Incidencias'
 
 /** Layout con sidebar + topnav — solo se muestra a usuarios autenticados */
 function AppLayout() {
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="/dashboard"    element={<Dashboard />} />
             <Route path="/employees"   element={<Employees />} />
             <Route path="/reports"     element={<Reports />} />
+            <Route path="/incidents"   element={<Incidencias />} />
             <Route path="/qr-generate"    element={<QRGenerate />} />
             <Route path="/notifications"  element={<NotificationSettings />} />
           </Route>
