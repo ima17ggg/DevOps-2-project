@@ -1,4 +1,4 @@
-import { supabase } from "../config/supabaseClient.js";
+import { supabase } from "../utils/supabase.js";
 
 export async function saveLocation(employeeId, lat, lng) {
   const { data, error } = await supabase
