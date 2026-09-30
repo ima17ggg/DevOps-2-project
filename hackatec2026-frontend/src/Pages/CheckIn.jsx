@@ -1,68 +1,51 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import jsQR from 'jsqr'
 import { startTrackingSession } from '../services/locationService'
 import { recordCheckIn } from '../services/checkInActivityService'
-import {
-  getQRSession,
-  getSessionEmployees,
-  getEmployeeByDevice,
-  registerDeviceForEmployee,
-  ALL_EMPLOYEES,
-} from '../services/qrSessionService'
-
-// ── Empleado mock de respaldo (cuando no hay sesión QR activa) ────────────────
-const MOCK_EMPLOYEE = {
-  id: 'OP-4921',
-  name: 'Marcus Johnson',
-  role: 'Operador de Maquinaria Pesada',
-  plant: 'Alpha-4',
-  shift: 'Mañana · 07:00 – 15:00',
-  department: 'Producción',
-  status: 'Activo',
-}
 
 // ────────────────────────────────────────────────────────────────────────────────
+// Flujo: 'qr' (escanear con jsQR) → 'confirm' (datos + foto) → 'done'
+// ────────────────────────────────────────────────────────────────────────────────
+
+/** Reduce la foto a un thumbnail chico para no reventar el límite de localStorage */
+function makeThumbnail(dataUrl, maxSize = 160) {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const ratio = Math.min(1, maxSize / Math.max(img.width, img.height))
+      const c = document.createElement('canvas')
+      c.width  = Math.max(1, Math.round(img.width  * ratio))
+      c.height = Math.max(1, Math.round(img.height * ratio))
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height)
+      resolve(c.toDataURL('image/jpeg', 0.6))
+    }
+    img.onerror = () => resolve(null)
+    img.src = dataUrl
+  })
+}
+
 export default function CheckIn() {
-  const navigate         = useNavigate()
-  const [searchParams]   = useSearchParams()
+  const navigate = useNavigate()
 
-  // Sesión QR (si viene de un pase generado)
-  const sessionToken     = searchParams.get('session')
-  const qrSession        = sessionToken ? getQRSession(sessionToken) : null
-  const sessionEmployees = qrSession ? getSessionEmployees(sessionToken) : []
-
-  // Pasos: 'qr' → 'pick' (selector de empleado) → 'confirm' → 'done'
-  const [step, setStep]                     = useState(() => {
-    if (qrSession) {
-      // Si el dispositivo ya está vinculado, saltar selección
-      const knownId = getEmployeeByDevice(sessionToken)
-      if (knownId) return 'confirm'
-      return 'pick'     // mostrar selector de empleado
-    }
-    return 'qr'         // flujo manual sin sesión
-  })
-  const [employee, setEmployee]             = useState(() => {
-    if (qrSession) {
-      const knownId = getEmployeeByDevice(sessionToken)
-      if (knownId) {
-        const found = ALL_EMPLOYEES.find(e => e.id === knownId)
-        if (found) return {
-          ...found,
-          plant:  'Alpha-4',
-          shift:  qrSession.shift ?? found.shift,
-          status: 'Activo',
-        }
-      }
-    }
-    return null
-  })
-  const [photo, setPhoto]                   = useState(null)
-  const [cameraError, setCameraError] = useState('')
+  const [step, setStep]                   = useState('qr')
+  const [employee, setEmployee]           = useState(null)
+  const [qrCode, setQrCode]               = useState(null)     // código crudo leído del QR
+  const [photo, setPhoto]                 = useState(null)
+  const [cameraError, setCameraError]     = useState('')       // permisos / hardware
+  const [scanError, setScanError]         = useState('')       // QR inválido / expirado / red
+  const [registerError, setRegisterError] = useState('')
   const [isRegistering, setIsRegistering] = useState(false)
+  const [result, setResult]               = useState(null)     // { tipo, asistencia, horas_trabajadas? }
+  const [now, setNow]                     = useState(() => new Date())
 
-  const videoRef  = useRef(null)
-  const canvasRef = useRef(null)
-  const streamRef = useRef(null)
+  const videoRef      = useRef(null)
+  const canvasRef     = useRef(null)
+  const scanCanvasRef = useRef(null)
+  const streamRef     = useRef(null)
+  const camReqRef     = useRef(0)                              // descarta getUserMedia obsoletos
+  const busyRef       = useRef(false)                          // hay una validación en curso
+  const lastCodeRef   = useRef({ code: null, at: 0 })          // cooldown del mismo QR
 
   // ── Cámara ──────────────────────────────────────────────────────────────────
   const stopCamera = useCallback(() => {
@@ -73,62 +56,118 @@ export default function CheckIn() {
   }, [])
 
   const startCamera = useCallback(async (facingMode = 'environment') => {
+    const reqId = ++camReqRef.current
     setCameraError('')
     stopCamera()
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
       })
+      // Si mientras esperábamos cambió el paso / se desmontó, soltamos este stream
+      if (reqId !== camReqRef.current) {
+        stream.getTracks().forEach((t) => t.stop())
+        return
+      }
       streamRef.current = stream
       if (videoRef.current) {
         videoRef.current.srcObject = stream
-        videoRef.current.play().catch(() => {})
+        await videoRef.current.play().catch(() => {})
       }
     } catch {
-      setCameraError('No se pudo acceder a la cámara. Verifica los permisos del navegador.')
+      if (reqId === camReqRef.current) {
+        setCameraError('No se pudo acceder a la cámara. Verifica los permisos del navegador.')
+      }
     }
   }, [stopCamera])
 
+  // Cámara trasera para escanear, frontal para la foto
   useEffect(() => {
-    if (step === 'qr')      startCamera('environment')  // cámara trasera para escanear QR
-    if (step === 'confirm') startCamera('user')         // cámara frontal para foto del empleado
-    if (step === 'pick')    stopCamera()                // sin cámara en selector de empleado
-    return () => stopCamera()
-  }, [step]) // eslint-disable-line
+    if (step === 'qr')      startCamera('environment')
+    if (step === 'confirm') startCamera('user')
+    return () => {
+      camReqRef.current++
+      stopCamera()
+    }
+  }, [step, startCamera, stopCamera])
 
-  // ── Acciones ────────────────────────────────────────────────────────────────
+  // Reloj en vivo en el paso de confirmación
+  useEffect(() => {
+    if (step !== 'confirm') return
+    const id = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(id)
+  }, [step])
 
-  /**
-   * Simula la detección exitosa del QR.
-   * Reemplazar con jsQR real: parsear el token de la URL embebida en el QR.
-   */
-  const handleQrDetected = () => {
-    stopCamera()
-    if (qrSession) {
-      // Si hay sesión activa, ir al selector de empleado
-      setStep('pick')
-    } else {
-      // Sin sesión → usar empleado mock
-      setEmployee(MOCK_EMPLOYEE)
+  // ── Validación del QR contra el API ─────────────────────────────────────────
+  const handleQrDetected = useCallback(async (qrData) => {
+    try {
+      const res  = await fetch(`/api/checkin/scan/${encodeURIComponent(qrData)}`)
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok || !json.success) {
+        // 404 → no reconocido, 410 → expirado; el backend manda el mensaje
+        setScanError(json.error ?? 'QR no reconocido. Intenta de nuevo.')
+        return
+      }
+      setScanError('')
+      setQrCode(qrData)
+      setPhoto(null)
+      setEmployee({ ...json.data, status: 'Activo' })
       setStep('confirm')
+    } catch {
+      setScanError('No se pudo validar el QR. Revisa tu conexión.')
+    } finally {
+      busyRef.current = false
     }
-  }
+  }, [])
 
-  /** El empleado se selecciona a sí mismo en el picker de la sesión QR */
-  const handlePickEmployee = (emp) => {
-    const fullEmployee = {
-      ...emp,
-      plant:  'Alpha-4',
-      shift:  qrSession?.shift ?? emp.shift,
-      status: 'Activo',
+  // ── Loop de escaneo con jsQR ────────────────────────────────────────────────
+  useEffect(() => {
+    if (step !== 'qr') return
+
+    const canvas = scanCanvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+
+    let raf = 0
+    let last = 0
+    let stopped = false
+
+    const tick = (t) => {
+      if (stopped) return
+      raf = requestAnimationFrame(tick)
+
+      const video = videoRef.current
+      if (busyRef.current) return
+      if (!video || !video.videoWidth || !video.videoHeight) return
+      if (t - last < 150) return                      // ~6 fps es suficiente
+      last = t
+
+      // Procesamos a ≤640px de ancho: más rápido y menos calor en el celular
+      const scale = Math.min(1, 640 / video.videoWidth)
+      canvas.width  = Math.round(video.videoWidth  * scale)
+      canvas.height = Math.round(video.videoHeight * scale)
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+      const img  = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      const code = jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' })
+      if (!code?.data) return
+
+      // Evita bombardear el API si la cámara sigue apuntando al mismo QR fallido
+      const prev = lastCodeRef.current
+      if (code.data === prev.code && t - prev.at < 3000) return
+      lastCodeRef.current = { code: code.data, at: t }
+
+      busyRef.current = true
+      handleQrDetected(code.data)
     }
-    // Vincular este dispositivo con el empleado para futuras entradas
-    if (sessionToken) registerDeviceForEmployee(sessionToken, emp.id)
-    setEmployee(fullEmployee)
-    setStep('confirm')
-  }
 
-  /** Captura el frame actual del video como foto */
+    raf = requestAnimationFrame(tick)
+    return () => {
+      stopped = true
+      cancelAnimationFrame(raf)
+    }
+  }, [step, handleQrDetected])
+
+  // ── Foto ────────────────────────────────────────────────────────────────────
   const capturePhoto = () => {
     const video  = videoRef.current
     const canvas = canvasRef.current
@@ -136,7 +175,7 @@ export default function CheckIn() {
     canvas.width  = video.videoWidth  || 640
     canvas.height = video.videoHeight || 480
     canvas.getContext('2d').drawImage(video, 0, 0)
-    setPhoto(canvas.toDataURL('image/jpeg', 0.92))
+    setPhoto(canvas.toDataURL('image/jpeg', 0.85))
     stopCamera()
   }
 
@@ -145,21 +184,53 @@ export default function CheckIn() {
     startCamera('user')
   }
 
-  const handleRegister = () => {
-    if (!photo) return
+  // ── Registro real contra el API ─────────────────────────────────────────────
+  const handleRegister = async () => {
+    if (!photo || isRegistering || !employee) return
     setIsRegistering(true)
-    setTimeout(() => {
-      stopCamera()
-      // Activa rastreo GPS en background (persiste mientras use la app)
-      startTrackingSession({ id: employee.id, name: employee.name, role: employee.role })
-      recordCheckIn(employee, photo)
+    setRegisterError('')
+    try {
+      const res = await fetch('/api/checkin/registrar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id_empleado: employee.id_empleado,
+          qr_code: qrCode, // el backend debería revalidarlo (ver notas)
+        }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok || !json.success) {
+        setRegisterError(json.error ?? 'No se pudo registrar. Intenta de nuevo.')
+        return
+      }
+
+      const data = json.data // { tipo: 'entrada' | 'salida', asistencia, horas_trabajadas? }
+
+      // Rastreo GPS solo al entrar
+      if (data.tipo === 'entrada') {
+        startTrackingSession({ id: employee.id_empleado, name: employee.name, role: employee.role })
+      }
+
+      // Guardar en actividad reciente sin que un error de storage rompa el flujo
+      try {
+        const thumb = await makeThumbnail(photo)
+        recordCheckIn(employee, thumb)
+      } catch (e) {
+        console.warn('No se pudo guardar la actividad reciente:', e)
+      }
+
+      setResult(data)
       setStep('done')
+    } catch {
+      setRegisterError('Sin conexión con el servidor. Intenta de nuevo.')
+    } finally {
       setIsRegistering(false)
-    }, 1400)
+    }
   }
 
   // ── Pantalla final ───────────────────────────────────────────────────────────
   if (step === 'done') {
+    const isExit = result?.tipo === 'salida'
     return (
       <div className="min-h-screen bg-[#f7f9fb] flex flex-col items-center justify-center gap-6 px-6">
         <div className="w-20 h-20 rounded-full bg-[#dcfce7] flex items-center justify-center">
@@ -170,13 +241,20 @@ export default function CheckIn() {
           </span>
         </div>
         <div className="text-center">
-          <h2 className="text-[#041632] text-[26px] font-black">¡Entrada registrada!</h2>
+          <h2 className="text-[#041632] text-[26px] font-black">
+            {isExit ? '¡Salida registrada!' : '¡Entrada registrada!'}
+          </h2>
           <p className="text-[#44474d] text-[15px] mt-2">
-            {employee?.name} — {employee?.shift}
+            {employee?.name}{employee?.shift ? ` — ${employee.shift}` : ''}
           </p>
           <p className="text-[#75777e] text-[13px] mt-1">
             {new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
           </p>
+          {isExit && typeof result?.horas_trabajadas === 'number' && (
+            <p className="text-[#041632] text-[14px] font-semibold mt-3">
+              Horas trabajadas hoy: {result.horas_trabajadas} h
+            </p>
+          )}
         </div>
         {photo && (
           <img
@@ -216,20 +294,12 @@ export default function CheckIn() {
           </div>
         </div>
 
-        {/* Paso indicator */}
-        {qrSession ? (
-          <div className="flex items-center gap-2">
-            <StepDot n={1} label="Empleado" active={step === 'pick'} done={step === 'confirm'} />
-            <div className="w-8 h-px bg-[#c5c6ce]" />
-            <StepDot n={2} label="Verificar" active={step === 'confirm'} done={false} />
-          </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <StepDot n={1} label="Escanear QR" active={step === 'qr'} done={step === 'confirm'} />
-            <div className="w-8 h-px bg-[#c5c6ce]" />
-            <StepDot n={2} label="Verificar y Registrar" active={step === 'confirm'} done={false} />
-          </div>
-        )}
+        {/* Indicador de pasos */}
+        <div className="flex items-center gap-2">
+          <StepDot n={1} label="Escanear QR" active={step === 'qr'} done={step === 'confirm'} />
+          <div className="w-8 h-px bg-[#c5c6ce]" />
+          <StepDot n={2} label="Verificar y Registrar" active={step === 'confirm'} done={false} />
+        </div>
       </header>
 
       {/* ══════════════════════ PASO 1: Escanear QR ══════════════════════ */}
@@ -244,34 +314,23 @@ export default function CheckIn() {
             </p>
           </div>
 
-          {/* Visor de cámara */}
+          {/* Visor de cámara: el <video> SIEMPRE montado; los errores van como overlay */}
           <div className="relative w-full max-w-[480px] bg-[#191c1e] rounded-2xl overflow-hidden shadow-xl"
                style={{ aspectRatio: '4/3' }}>
 
-            {cameraError ? (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
-                <span className="material-symbols-outlined notranslate text-[#fc820c] text-[40px]" translate="no">videocam_off</span>
-                <p className="text-white text-[13px]">{cameraError}</p>
-                <button
-                  onClick={() => startCamera('environment')}
-                  className="mt-1 px-4 py-2 bg-[#964900] text-white text-[12px] font-semibold rounded-lg cursor-pointer hover:bg-[#7d3d00] transition-colors"
-                >
-                  Reintentar
-                </button>
-              </div>
-            ) : (
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+            />
+
+            {!cameraError && (
               <>
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full h-full object-cover"
-                />
-                {/* Marco de QR con esquinas animadas */}
+                {/* Marco de QR con esquinas */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="relative w-52 h-52">
-                    {/* Esquinas del marco */}
                     {[
                       'top-0 left-0 border-t-4 border-l-4 rounded-tl-lg',
                       'top-0 right-0 border-t-4 border-r-4 rounded-tr-lg',
@@ -281,7 +340,7 @@ export default function CheckIn() {
                       <div key={i} className={`absolute w-9 h-9 border-[#fc820c] ${cls}`} />
                     ))}
                     {/* Línea de escaneo animada */}
-                    <div className="absolute left-2 right-2 top-0 h-0.5 bg-[#fc820c]/80 animate-[scan_2s_ease-in-out_infinite]"
+                    <div className="absolute left-2 right-2 top-0 h-0.5 bg-[#fc820c]/80"
                          style={{ animation: 'scan 2s ease-in-out infinite' }} />
                   </div>
                 </div>
@@ -290,86 +349,31 @@ export default function CheckIn() {
                      style={{ boxShadow: 'inset 0 0 0 9999px rgba(0,0,0,0.45)' }} />
               </>
             )}
-          </div>
 
-          {/* Botón de confirmar (simula detección exitosa; reemplazar con jsQR real) */}
-          <button
-            onClick={handleQrDetected}
-            disabled={!!cameraError}
-            className="h-[50px] px-10 bg-[#041632] hover:bg-[#1b2b48] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-bold rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer shadow-md"
-          >
-            <span className="material-symbols-outlined notranslate text-[#fc820c] text-[20px]" translate="no">qr_code_scanner</span>
-            QR Detectado — Continuar
-          </button>
-          <p className="text-[#75777e] text-[12px]">
-            El sistema detectará el QR automáticamente al integrarse con el API.
-          </p>
-        </div>
-      )}
-
-      {/* ══════════════════════ PASO PICK: Seleccionar empleado ══════════════ */}
-      {step === 'pick' && (
-        <div className="flex-1 flex flex-col items-center px-6 py-8 gap-6 max-w-[520px] w-full mx-auto">
-          {/* Cabecera */}
-          <div className="text-center w-full">
-            <div className="w-14 h-14 rounded-full bg-[#fc820c]/10 flex items-center justify-center mx-auto mb-3">
-              <span className="material-symbols-outlined notranslate text-[#fc820c] text-[30px]"
-                translate="no"
-                style={{ fontVariationSettings: "'FILL' 1" }}>badge</span>
-            </div>
-            <h1 className="text-[#041632] text-[22px] font-black">¿Quién eres?</h1>
-            <p className="text-[#44474d] text-[13px] mt-1.5">
-              Selecciona tu nombre en la lista de empleados autorizados para hoy.
-            </p>
-            {qrSession && (
-              <div className="mt-3 inline-flex items-center gap-2 bg-[#041632]/[0.06] border border-[#041632]/20 rounded-full px-4 py-1.5">
-                <span className="material-symbols-outlined notranslate text-[#041632] text-[14px]" translate="no">schedule</span>
-                <span className="text-[#041632] text-[12px] font-semibold">
-                  {qrSession.shift} · {qrSession.date}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Lista de empleados de la sesión */}
-          <div className="w-full bg-white border border-[#e0e3e5] rounded-2xl shadow-sm overflow-hidden">
-            <div className="px-4 py-2.5 bg-[#f7f9fb] border-b border-[#e0e3e5]">
-              <p className="text-[11px] text-[#75777e] font-semibold uppercase tracking-wide">
-                {sessionEmployees.length} empleado{sessionEmployees.length !== 1 ? 's' : ''} autorizados hoy
-              </p>
-            </div>
-            {sessionEmployees.length === 0 ? (
-              <div className="py-10 text-center text-[#75777e] text-[13px]">
-                <span className="material-symbols-outlined notranslate text-[32px] block mb-2" translate="no">person_off</span>
-                No hay empleados registrados en esta sesión
-              </div>
-            ) : (
-              sessionEmployees.map(emp => (
+            {cameraError && (
+              <div className="absolute inset-0 bg-[#191c1e] flex flex-col items-center justify-center gap-3 p-6 text-center">
+                <span className="material-symbols-outlined notranslate text-[#fc820c] text-[40px]" translate="no">videocam_off</span>
+                <p className="text-white text-[13px]">{cameraError}</p>
                 <button
-                  key={emp.id}
-                  onClick={() => handlePickEmployee(emp)}
-                  className="w-full flex items-center gap-3.5 px-4 py-3.5 border-b border-[#f2f4f6] hover:bg-[#041632]/[0.04] active:bg-[#041632]/[0.08] transition-colors cursor-pointer text-left"
+                  onClick={() => startCamera('environment')}
+                  className="mt-1 px-4 py-2 bg-[#964900] text-white text-[12px] font-semibold rounded-lg cursor-pointer hover:bg-[#7d3d00] transition-colors"
                 >
-                  {/* Avatar */}
-                  <div className="w-11 h-11 rounded-full bg-[#041632] text-white flex items-center justify-center text-[13px] font-bold shrink-0">
-                    {emp.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[#041632] text-[14px] font-bold truncate">{emp.name}</p>
-                    <p className="text-[#75777e] text-[12px] truncate">{emp.role} · {emp.department}</p>
-                  </div>
-                  <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span className="text-[11px] font-mono text-[#adb0b7]">{emp.id}</span>
-                    <span className="material-symbols-outlined notranslate text-[#c5c6ce] text-[18px]" translate="no">chevron_right</span>
-                  </div>
+                  Reintentar
                 </button>
-              ))
+              </div>
             )}
           </div>
 
-          <p className="text-[#75777e] text-[11px] text-center leading-relaxed">
-            Tu dispositivo quedará vinculado a tu nombre para próximas entradas.
-            <br />El sistema te reconocerá automáticamente la siguiente vez.
+          {/* Error de validación del QR (expirado / no reconocido / red) */}
+          {scanError && (
+            <div className="w-full max-w-[480px] flex items-start gap-2.5 bg-[#fef2f2] border border-[#fecaca] text-[#b91c1c] rounded-xl px-4 py-3">
+              <span className="material-symbols-outlined notranslate text-[18px] mt-px" translate="no">error</span>
+              <p className="text-[13px] font-medium">{scanError}</p>
+            </div>
+          )}
+
+          <p className="text-[#75777e] text-[12px] text-center">
+            El código se detecta automáticamente; no necesitas presionar nada.
           </p>
         </div>
       )}
@@ -398,12 +402,12 @@ export default function CheckIn() {
                 </div>
               </div>
 
-              {/* Campos de info */}
+              {/* Campos de info (el API hoy no manda turno ni área → se muestra "—") */}
               <div className="p-5 grid grid-cols-2 gap-4">
-                <InfoField label="ID Empleado" value={employee.id} icon="badge" mono />
-                <InfoField label="Planta"      value={employee.plant}      icon="factory" />
-                <InfoField label="Turno"       value={employee.shift}      icon="schedule" />
-                <InfoField label="Área"        value={employee.department} icon="domain" />
+                <InfoField label="ID Empleado" value={employee.id}                 icon="badge" mono />
+                <InfoField label="Planta"      value={employee.plant  || '—'}      icon="factory" />
+                <InfoField label="Turno"       value={employee.shift  || '—'}      icon="schedule" />
+                <InfoField label="Área"        value={employee.department || '—'}  icon="domain" />
               </div>
 
               {/* Hora de registro */}
@@ -411,9 +415,9 @@ export default function CheckIn() {
                 <div className="bg-[#f7f9fb] border border-[#e0e3e5] rounded-xl px-4 py-3 flex items-center gap-3">
                   <span className="material-symbols-outlined notranslate text-[#fc820c] text-[20px]" translate="no">schedule</span>
                   <div>
-                    <p className="text-[#75777e] text-[11px] uppercase font-semibold tracking-wide">Hora de entrada</p>
+                    <p className="text-[#75777e] text-[11px] uppercase font-semibold tracking-wide">Hora de registro</p>
                     <p className="text-[#041632] text-[16px] font-bold font-mono">
-                      {new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                      {now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                     </p>
                   </div>
                 </div>
@@ -451,32 +455,39 @@ export default function CheckIn() {
               </div>
 
               <div className="p-5 flex flex-col gap-4 flex-1">
-                {/* Área de cámara / foto */}
+                {/* Área de cámara / foto: el <video> siempre montado (oculto si ya hay foto) */}
                 <div className="relative bg-[#191c1e] rounded-xl overflow-hidden flex items-center justify-center"
                      style={{ minHeight: '260px' }}>
 
-                  {photo ? (
-                    // Muestra la foto capturada
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className={`w-full h-full object-cover ${photo ? 'hidden' : ''}`}
+                  />
+
+                  {photo && (
                     <img src={photo} alt="Foto verificación" className="w-full h-full object-cover" />
-                  ) : cameraError ? (
-                    <div className="flex flex-col items-center gap-2 p-6 text-center">
+                  )}
+
+                  {!photo && !cameraError && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-36 h-44 rounded-full border-2 border-white/40 border-dashed" />
+                    </div>
+                  )}
+
+                  {!photo && cameraError && (
+                    <div className="absolute inset-0 bg-[#191c1e] flex flex-col items-center justify-center gap-2 p-6 text-center">
                       <span className="material-symbols-outlined notranslate text-[#fc820c] text-[36px]" translate="no">videocam_off</span>
                       <p className="text-white text-[12px]">{cameraError}</p>
+                      <button
+                        onClick={() => startCamera('user')}
+                        className="mt-1 px-4 py-2 bg-[#964900] text-white text-[12px] font-semibold rounded-lg cursor-pointer hover:bg-[#7d3d00] transition-colors"
+                      >
+                        Reintentar
+                      </button>
                     </div>
-                  ) : (
-                    <>
-                      <video
-                        ref={videoRef}
-                        autoPlay
-                        playsInline
-                        muted
-                        className="w-full h-full object-cover"
-                      />
-                      {/* Guía de encuadre */}
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-36 h-44 rounded-full border-2 border-white/40 border-dashed" />
-                      </div>
-                    </>
                   )}
                 </div>
 
@@ -506,6 +517,14 @@ export default function CheckIn() {
               </div>
             </div>
 
+            {/* Error de registro */}
+            {registerError && (
+              <div className="flex items-start gap-2.5 bg-[#fef2f2] border border-[#fecaca] text-[#b91c1c] rounded-xl px-4 py-3">
+                <span className="material-symbols-outlined notranslate text-[18px] mt-px" translate="no">error</span>
+                <p className="text-[13px] font-medium">{registerError}</p>
+              </div>
+            )}
+
             {/* Botón de registro final */}
             <button
               onClick={handleRegister}
@@ -518,14 +537,14 @@ export default function CheckIn() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
                   </svg>
-                  Registrando entrada...
+                  Registrando...
                 </>
               ) : (
                 <>
                   <span className="material-symbols-outlined notranslate text-[20px]"
                     translate="no"
                     style={{ fontVariationSettings: "'FILL' 1" }}>how_to_reg</span>
-                  {photo ? 'Confirmar y registrar entrada' : 'Toma la foto para continuar'}
+                  {photo ? 'Confirmar y registrar' : 'Toma la foto para continuar'}
                 </>
               )}
             </button>
@@ -533,10 +552,11 @@ export default function CheckIn() {
         </div>
       )}
 
-      {/* Canvas oculto para capturar frames */}
+      {/* Canvas ocultos para capturar frames */}
       <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
+      <canvas ref={scanCanvasRef} className="hidden" aria-hidden="true" />
 
-      {/* Estilos de animación de línea de escaneo */}
+      {/* Animación de la línea de escaneo */}
       <style>{`
         @keyframes scan {
           0%   { top: 8px;  opacity: 1; }
@@ -548,7 +568,7 @@ export default function CheckIn() {
   )
 }
 
-// ── Componentes auxiliares ────────────────────────────────────────────────----
+// ── Componentes auxiliares ─────────────────────────────────────────────────────
 
 function StepDot({ n, label, active, done }) {
   return (

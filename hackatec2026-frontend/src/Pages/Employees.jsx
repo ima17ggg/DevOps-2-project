@@ -28,6 +28,17 @@ export default function Employees() {
     const [formError, setFormError] = useState(null)
     const [submitting, setSubmitting] = useState(false)
 
+    // View Employee (Details) modal state
+    const [viewEmployee, setViewEmployee] = useState(null) // row data, shown immediately
+    const [viewDetail, setViewDetail] = useState(null) // full detail fetched from /api/empleados/:id
+    const [viewLoading, setViewLoading] = useState(false)
+    const [viewError, setViewError] = useState(null)
+
+    // Delete Employee state
+    const [deletingEmployee, setDeletingEmployee] = useState(null)
+    const [deleteError, setDeleteError] = useState(null)
+    const [deleteSubmitting, setDeleteSubmitting] = useState(false)
+
     // Lookup data for id_rol / id_planta_destino selects
     const [roles, setRoles] = useState([])
     const [plantas, setPlantas] = useState([])
@@ -187,6 +198,73 @@ export default function Employees() {
         }
     }
 
+    // --- View Details ---
+    async function openViewModal(employee) {
+        setViewEmployee(employee)
+        setViewDetail(null)
+        setViewError(null)
+        setViewLoading(true)
+
+        try {
+            const id = employee.id_empleado ?? employee.id
+            const res = await fetch(`/api/empleados/${id}`)
+
+            if (!res.ok) {
+                const body = await res.json().catch(() => null)
+                throw new Error(body?.message || body?.error || 'No se pudieron cargar los detalles del empleado')
+            }
+
+            const body = await res.json()
+            setViewDetail(body?.data ?? body)
+        } catch (err) {
+            setViewError(err.message)
+        } finally {
+            setViewLoading(false)
+        }
+    }
+
+    function closeViewModal() {
+        setViewEmployee(null)
+        setViewDetail(null)
+        setViewError(null)
+    }
+
+    // --- Delete ---
+    function openDeleteConfirm(employee) {
+        setDeletingEmployee(employee)
+        setDeleteError(null)
+    }
+
+    function closeDeleteConfirm() {
+        if (deleteSubmitting) return
+        setDeletingEmployee(null)
+        setDeleteError(null)
+    }
+
+    async function confirmDelete() {
+        if (!deletingEmployee) return
+
+        const id = deletingEmployee.id_empleado ?? deletingEmployee.id
+        setDeleteSubmitting(true)
+        setDeleteError(null)
+
+        try {
+            const res = await fetch(`/api/empleados/${id}`, { method: 'DELETE' })
+
+            if (!res.ok) {
+                const body = await res.json().catch(() => null)
+                throw new Error(body?.message || body?.error || 'No se pudo eliminar el empleado')
+            }
+
+            setEmployees((prev) => prev.filter((e) => (e.id_empleado ?? e.id) !== id))
+            setDeletingEmployee(null)
+        } catch (err) {
+            setDeleteError(err.message)
+        } finally {
+            setDeleteSubmitting(false)
+        }
+    }
+
     const filteredEmployees = employees.filter((employee) => {
         const term = searchTerm.trim().toLowerCase()
         if (!term) return true
@@ -224,9 +302,6 @@ export default function Employees() {
                 </div>
 
                 <div className="flex gap-3">
-                    <button className="h-12 px-5 rounded-xl border border-[#c5c6ce] bg-white hover:bg-[#f2f4f6] transition-colors font-semibold text-[#041632]">
-                        Export Roster
-                    </button>
 
                     <button
                         onClick={() => fileInputRef.current?.click()}
@@ -389,12 +464,18 @@ export default function Employees() {
 
                                     <TableCell align="right">
                                         <div className="flex justify-end gap-2">
-                                            <button className="px-4 h-9 rounded-lg border border-[#c5c6ce] hover:bg-[#f2f4f6] transition-colors text-sm font-medium">
-                                                View
+                                            <button
+                                                onClick={() => openViewModal(employee)}
+                                                className="px-4 h-9 rounded-lg bg-[#041632] hover:bg-[#1b2b48] transition-colors text-white text-sm font-medium"
+                                            >
+                                                Details
                                             </button>
 
-                                            <button className="px-4 h-9 rounded-lg bg-[#041632] hover:bg-[#1b2b48] transition-colors text-white text-sm font-medium">
-                                                Details
+                                            <button
+                                                onClick={() => openDeleteConfirm(employee)}
+                                                className="px-4 h-9 rounded-lg border border-[#f3c2c2] text-[#ba1a1a] hover:bg-[#fdeeee] transition-colors text-sm font-medium"
+                                            >
+                                                Delete
                                             </button>
                                         </div>
                                     </TableCell>
@@ -464,6 +545,112 @@ export default function Employees() {
                     </div>
                 </div>
             )}
+
+            {/* View Employee (Details) Modal */}
+            {viewEmployee && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+                        <div className="flex items-center justify-between mb-5">
+                            <h3 className="text-xl font-semibold text-[#041632]">Employee Details</h3>
+                            <button
+                                onClick={closeViewModal}
+                                className="text-[#75777e] hover:text-[#041632] text-lg leading-none"
+                                aria-label="Close"
+                                type="button"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        {viewLoading && (
+                            <p className="text-sm text-[#75777e] py-2">Cargando detalles...</p>
+                        )}
+
+                        {viewError && (
+                            <p className="text-sm text-[#ba1a1a] mb-4">
+                                {viewError} Mostrando los datos disponibles de la tabla.
+                            </p>
+                        )}
+
+                        <div className="flex flex-col gap-4">
+                            <DetailRow
+                                label="Nombre completo"
+                                value={viewDetail?.name ?? viewEmployee.name ?? `${viewEmployee.nombre ?? ''} ${viewEmployee.apellido_paterno ?? ''} ${viewEmployee.apellido_materno ?? ''}`.trim()}
+                            />
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <DetailRow label="ID" value={viewDetail?.id ?? viewEmployee.id ?? viewEmployee.id_empleado} />
+                                <DetailRow label="RFC" value={viewDetail?.rfc} />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <DetailRow label="Teléfono" value={viewDetail?.telefono} />
+                                <DetailRow label="Fecha de ingreso" value={viewDetail?.fecha_ingreso} />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <DetailRow label="Rol" value={viewDetail?.role ?? viewEmployee.role} />
+                                <DetailRow label="Planta" value={viewDetail?.plant ?? viewEmployee.plant} />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <DetailRow label="Estado" value={viewDetail?.status ?? viewEmployee.status} />
+                                <DetailRow label="Último check-in" value={viewDetail?.checkIn ?? viewEmployee.checkIn} />
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end gap-3 mt-6">
+                            <button
+                                type="button"
+                                onClick={closeViewModal}
+                                className="h-11 px-5 rounded-xl border border-[#c5c6ce] hover:bg-[#f2f4f6] transition-colors font-semibold text-[#041632]"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Employee confirmation */}
+            {deletingEmployee && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+                        <h3 className="text-xl font-semibold text-[#041632] mb-2">Delete Employee</h3>
+
+                        <p className="text-sm text-[#44474d] mb-5">
+                            ¿Seguro que quieres eliminar a{' '}
+                            <span className="font-semibold text-[#191c1e]">
+                                {deletingEmployee.name ?? `${deletingEmployee.nombre ?? ''} ${deletingEmployee.apellido_paterno ?? ''}`.trim()}
+                            </span>? Esta acción no se puede deshacer.
+                        </p>
+
+                        {deleteError && (
+                            <p className="text-sm text-[#ba1a1a] mb-4">{deleteError}</p>
+                        )}
+
+                        <div className="flex justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={closeDeleteConfirm}
+                                disabled={deleteSubmitting}
+                                className="h-11 px-5 rounded-xl border border-[#c5c6ce] hover:bg-[#f2f4f6] transition-colors font-semibold text-[#041632] disabled:opacity-60"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={confirmDelete}
+                                disabled={deleteSubmitting}
+                                className="h-11 px-5 rounded-xl bg-[#ba1a1a] hover:bg-[#a01717] disabled:opacity-60 transition-colors text-white font-semibold"
+                            >
+                                {deleteSubmitting ? 'Eliminando...' : 'Delete'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }
@@ -495,6 +682,15 @@ function TableCell({ children, align = 'left' }) {
         <td className={`px-6 py-5 text-${align} text-sm`}>
             {children}
         </td>
+    );
+}
+
+function DetailRow({ label, value }) {
+    return (
+        <div className="flex flex-col gap-1">
+            <span className="text-xs uppercase tracking-[0.08em] text-[#75777e] font-semibold">{label}</span>
+            <span className="text-sm text-[#191c1e] font-medium">{value || '—'}</span>
+        </div>
     );
 }
 
