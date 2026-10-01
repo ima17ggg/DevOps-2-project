@@ -9,13 +9,6 @@ const router = express.Router();
 
 import { authenticateJWT } from '../middleware/auth.js';
 
-const locationReadLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 120,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
 router.post('/', asyncHandler(async (req, res) => {
   const { employeeId, lat, lng } = req.body;
   validateRequired(req.body, ['employeeId', 'lat', 'lng']);
@@ -25,7 +18,12 @@ router.post('/', asyncHandler(async (req, res) => {
   res.json(successResponse(location));
 }));
 
-router.get('/', authenticateJWT, locationReadLimiter, asyncHandler(async (req, res) => {
+router.get('/', authenticateJWT, rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+}), asyncHandler(async (req, res) => {
   const locations = await locationService.getLocations();
   res.json(successResponse(locations));
 }));
