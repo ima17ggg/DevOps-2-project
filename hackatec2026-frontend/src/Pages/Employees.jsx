@@ -33,6 +33,9 @@ export default function Employees() {
     const [viewDetail, setViewDetail] = useState(null) // full detail fetched from /api/empleados/:id
     const [viewLoading, setViewLoading] = useState(false)
     const [viewError, setViewError] = useState(null)
+    const [viewEditMode, setViewEditMode] = useState(false)
+    const [viewEditForm, setViewEditForm] = useState({ id_rol: '', id_planta_destino: '', telefono: '' })
+    const [viewEditSubmitting, setViewEditSubmitting] = useState(false)
 
     // Delete Employee state
     const [deletingEmployee, setDeletingEmployee] = useState(null)
@@ -204,6 +207,7 @@ export default function Employees() {
         setViewDetail(null)
         setViewError(null)
         setViewLoading(true)
+        setViewEditMode(false)
 
         try {
             const id = employee.id_empleado ?? employee.id
@@ -215,7 +219,13 @@ export default function Employees() {
             }
 
             const body = await res.json()
-            setViewDetail(body?.data ?? body)
+            const detail = body?.data ?? body
+            setViewDetail(detail)
+            setViewEditForm({
+                id_rol: detail.id_rol ?? '',
+                id_planta_destino: detail.id_planta_destino ?? '',
+                telefono: detail.telefono ?? ''
+            })
         } catch (err) {
             setViewError(err.message)
         } finally {
@@ -227,6 +237,36 @@ export default function Employees() {
         setViewEmployee(null)
         setViewDetail(null)
         setViewError(null)
+        setViewEditMode(false)
+    }
+
+    async function handleSaveViewEdit() {
+        if (!viewDetail) return
+        setViewEditSubmitting(true)
+        try {
+            const payload = {
+                id_rol: viewEditForm.id_rol ? Number(viewEditForm.id_rol) : null,
+                id_planta_destino: viewEditForm.id_planta_destino ? Number(viewEditForm.id_planta_destino) : null,
+                telefono: viewEditForm.telefono.trim() || null
+            }
+            const res = await fetch(`/api/empleados/${viewDetail.id_empleado}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            if (!res.ok) {
+                const b = await res.json().catch(() => null)
+                throw new Error(b?.message || b?.error || 'No se pudo actualizar el empleado')
+            }
+            
+            // Re-fetch to update local state
+            await openViewModal(viewEmployee)
+            fetchEmployees() 
+        } catch(err) {
+            alert(err.message)
+        } finally {
+            setViewEditSubmitting(false)
+        }
     }
 
     // --- Delete ---
@@ -584,13 +624,26 @@ export default function Employees() {
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <DetailRow label="Teléfono" value={viewDetail?.telefono} />
+                                {viewEditMode ? (
+                                    <Field label="Teléfono" name="telefono" value={viewEditForm.telefono} onChange={(e) => setViewEditForm(prev => ({ ...prev, telefono: e.target.value }))} type="tel" />
+                                ) : (
+                                    <DetailRow label="Teléfono" value={viewDetail?.telefono} />
+                                )}
                                 <DetailRow label="Fecha de ingreso" value={viewDetail?.fecha_ingreso} />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <DetailRow label="Rol" value={viewDetail?.role ?? viewEmployee.role} />
-                                <DetailRow label="Planta" value={viewDetail?.plant ?? viewEmployee.plant} />
+                                {viewEditMode ? (
+                                    <>
+                                        <SelectField label="Rol" name="id_rol" value={viewEditForm.id_rol} onChange={(e) => setViewEditForm(prev => ({ ...prev, id_rol: e.target.value }))} options={roles} placeholder="Sin asignar" labelKey="descripcion" />
+                                        <SelectField label="Planta" name="id_planta_destino" value={viewEditForm.id_planta_destino} onChange={(e) => setViewEditForm(prev => ({ ...prev, id_planta_destino: e.target.value }))} options={plantas} placeholder="Sin asignar" />
+                                    </>
+                                ) : (
+                                    <>
+                                        <DetailRow label="Rol" value={viewDetail?.role ?? viewEmployee.role} />
+                                        <DetailRow label="Planta" value={viewDetail?.plant ?? viewEmployee.plant} />
+                                    </>
+                                )}
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
@@ -600,13 +653,43 @@ export default function Employees() {
                         </div>
 
                         <div className="flex justify-end gap-3 mt-6">
-                            <button
-                                type="button"
-                                onClick={closeViewModal}
-                                className="h-11 px-5 rounded-xl border border-[#c5c6ce] hover:bg-[#f2f4f6] transition-colors font-semibold text-[#041632]"
-                            >
-                                Close
-                            </button>
+                            {!viewEditMode ? (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={() => setViewEditMode(true)}
+                                        className="h-11 px-5 rounded-xl bg-[#fc820c] hover:bg-[#e97808] transition-colors font-semibold text-white"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={closeViewModal}
+                                        className="h-11 px-5 rounded-xl border border-[#c5c6ce] hover:bg-[#f2f4f6] transition-colors font-semibold text-[#041632]"
+                                    >
+                                        Close
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={handleSaveViewEdit}
+                                        disabled={viewEditSubmitting}
+                                        className="h-11 px-5 rounded-xl bg-[#15803d] hover:bg-[#166534] disabled:opacity-60 transition-colors font-semibold text-white"
+                                    >
+                                        {viewEditSubmitting ? 'Saving...' : 'Save'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setViewEditMode(false)}
+                                        disabled={viewEditSubmitting}
+                                        className="h-11 px-5 rounded-xl border border-[#c5c6ce] hover:bg-[#f2f4f6] disabled:opacity-60 transition-colors font-semibold text-[#041632]"
+                                    >
+                                        Cancel
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
