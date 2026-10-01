@@ -77,7 +77,9 @@ export default function Login() {
         <div className="relative z-10">
           <div className="flex items-center gap-4 mb-10">
             <div className="w-12 h-12 bg-[#fc820c] rounded-xl flex items-center justify-center shadow-lg">
-              <span className="material-symbols-outlined text-white text-[26px]">factory</span>
+              <span translate="no" className="material-symbols-outlined notranslate text-white text-[26px]">
+                factory
+              </span>
             </div>
             <div>
               <p className="text-[#b7c8e1] text-[11px] font-semibold uppercase tracking-[0.18em]">
@@ -118,7 +120,9 @@ export default function Login() {
           {/* Mobile: logo pequeño */}
           <div className="flex lg:hidden items-center gap-3 mb-8">
             <div className="w-9 h-9 bg-[#041632] rounded-lg flex items-center justify-center">
-              <span className="material-symbols-outlined text-white text-[18px]">factory</span>
+              <span translate="no" className="material-symbols-outlined notranslate text-white text-[18px]">
+                factory
+              </span>
             </div>
             <span className="text-[#041632] text-[17px] font-bold">Workforce Manager</span>
           </div>
@@ -134,12 +138,13 @@ export default function Login() {
 
             {/* ── Usuario ── */}
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="username" className="text-[#041632] text-[13px] font-semibold">
+              <label htmlFor="email" className="text-[#041632] text-[13px] font-semibold">
                 Correo o usuario <span className="text-[#ba1a1a]" aria-hidden="true">*</span>
               </label>
               <div className="relative">
                 <span
-                  className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#75777e] text-[20px] pointer-events-none"
+                  translate="no"
+                  className="material-symbols-outlined notranslate absolute left-3.5 top-1/2 -translate-y-1/2 text-[#75777e] text-[20px] pointer-events-none"
                   aria-hidden="true"
                 >
                   person
@@ -173,7 +178,8 @@ export default function Login() {
               </div>
               <div className="relative">
                 <span
-                  className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#75777e] text-[20px] pointer-events-none"
+                  translate="no"
+                  className="material-symbols-outlined notranslate absolute left-3.5 top-1/2 -translate-y-1/2 text-[#75777e] text-[20px] pointer-events-none"
                   aria-hidden="true"
                 >
                   lock
@@ -195,7 +201,7 @@ export default function Login() {
                   aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#75777e] hover:text-[#041632] transition-colors cursor-pointer p-0.5 rounded"
                 >
-                  <span className="material-symbols-outlined text-[20px]">
+                  <span translate="no" className="material-symbols-outlined notranslate text-[20px]">
                     {showPassword ? 'visibility_off' : 'visibility'}
                   </span>
                 </button>
@@ -209,7 +215,9 @@ export default function Login() {
                 aria-live="polite"
                 className="flex items-center gap-2 px-3 py-2.5 bg-[#ffdad6] border border-[#ba1a1a]/30 rounded-lg text-[#ba1a1a] text-[13px] font-medium"
               >
-                <span className="material-symbols-outlined text-[16px] flex-shrink-0">error</span>
+                <span translate="no" className="material-symbols-outlined notranslate text-[16px] flex-shrink-0">
+                  error
+                </span>
                 {error}
               </div>
             )}
@@ -236,7 +244,9 @@ export default function Login() {
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-[18px]">login</span>
+                  <span translate="no" className="material-symbols-outlined notranslate text-[18px]">
+                    login
+                  </span>
                   Ingresar al sistema
                 </>
               )}
@@ -254,7 +264,9 @@ export default function Login() {
             type="button"
             className="w-full h-[46px] border border-[#c5c6ce] bg-white hover:bg-[#f2f4f6] text-[#041632] text-[13px] font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px] text-[#964900]">qr_code_scanner</span>
+            <span translate="no" className="material-symbols-outlined notranslate text-[18px] text-[#964900]">
+              qr_code_scanner
+            </span>
             Escanear QR de acceso rápido
           </button>
 
@@ -269,11 +281,13 @@ export default function Login() {
   )
 }
 
-/* Componente auxiliar para stats del panel izquierdo */
+/* Componente auxiliar para stats del panel izquierdo con blindaje anti-traducción */
 function StatBadge({ icon, value, label }) {
   return (
     <div className="flex items-center gap-3 bg-white/[0.07] border border-white/[0.12] rounded-xl px-4 py-3">
-      <span className="material-symbols-outlined text-[#fc820c] text-[20px]">{icon}</span>
+      <span translate="no" className="material-symbols-outlined notranslate text-[#fc820c] text-[20px]">
+        {icon}
+      </span>
       <div>
         <p className="text-white text-[16px] font-bold leading-none">{value}</p>
         <p className="text-[#b7c8e1] text-[11px] mt-0.5">{label}</p>

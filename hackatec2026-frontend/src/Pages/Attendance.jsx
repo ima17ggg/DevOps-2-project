@@ -15,13 +15,17 @@ export default function Attendance() {
     <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased selection:bg-secondary-container selection:text-on-secondary-container">
       <header className="bg-surface border-b border-outline-variant flex justify-between items-center w-full px-gutter h-16 shrink-0 z-50">
         <div className="flex items-center gap-sm">
+          {/* Blindaje de ícono */}
           <span
-            className="material-symbols-outlined text-primary"
+            translate="no"
+            className="material-symbols-outlined notranslate text-primary"
             style={{ fontVariationSettings: "'FILL' 1" }}
           >
             factory
           </span>
-          <span className="font-headline-md text-headline-md font-bold text-primary">Industrial Ops</span>
+          <span className="font-headline-md text-headline-md font-bold text-primary" translate="no">
+            Industrial Ops
+          </span>
         </div>
         <div className="flex items-center gap-md">
           <div className="flex items-center gap-xs bg-surface-container-low px-sm py-xs rounded-full border border-outline-variant">
@@ -29,7 +33,8 @@ export default function Attendance() {
             <span className="font-label-md text-label-md text-on-surface-variant">System Online</span>
           </div>
           <button className="text-on-surface-variant hover:bg-surface-container-high transition-colors p-sm rounded-full flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
-            <span className="material-symbols-outlined" data-icon="help">
+            {/* Blindaje de ícono */}
+            <span className="material-symbols-outlined notranslate" data-icon="help" translate="no">
               help
             </span>
           </button>
@@ -55,8 +60,10 @@ export default function Attendance() {
             <div className="absolute inset-0 bg-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="relative z-10 flex flex-col items-center">
               <div className="w-24 h-24 rounded-full bg-tertiary-fixed flex items-center justify-center mb-md group-hover:scale-110 transition-transform duration-300">
+                {/* Blindaje de ícono */}
                 <span
-                  className="material-symbols-outlined text-tertiary-container text-5xl"
+                  translate="no"
+                  className="material-symbols-outlined notranslate text-tertiary-container text-5xl"
                   style={{ fontVariationSettings: "'FILL' 0" }}
                 >
                   qr_code_scanner
@@ -80,8 +87,10 @@ export default function Attendance() {
             <div className="absolute inset-0 bg-secondary-container/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="relative z-10 flex flex-col items-center">
               <div className="w-24 h-24 rounded-full bg-secondary-fixed flex items-center justify-center mb-md group-hover:scale-110 transition-transform duration-300">
+                {/* Blindaje de ícono */}
                 <span
-                  className="material-symbols-outlined text-secondary-container text-5xl"
+                  translate="no"
+                  className="material-symbols-outlined notranslate text-secondary-container text-5xl"
                   style={{ fontVariationSettings: "'FILL' 0" }}
                 >
                   logout

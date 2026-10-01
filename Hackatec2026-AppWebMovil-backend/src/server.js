@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import { authenticateJWT } from './middleware/auth.js';
 import { errorHandler, asyncHandler } from './middleware/errors.js';
+import { startQrScheduler } from './utils/qrScheduler.js';
 
 // Route imports
 import usuariosRouter from './routes/usuarios.js';
@@ -21,6 +22,8 @@ import gpsRouter from './routes/gps.js';
 import excelRouter from './routes/excel.js';
 import dashboardRouter from './routes/dashboard.js';
 import rolesRouter from './routes/roles.js';
+import checkinRouter from './routes/checkin.js';
+import locationRoute from './routes/LocationRoute.js'
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -58,9 +61,11 @@ app.use('/api/codigos-qr', authenticateJWT, codigosQrRouter);
 app.use('/api/incidencias', authenticateJWT, incidenciasRouter);
 app.use('/api/notificaciones', authenticateJWT, notificacionesRouter);
 app.use('/api/clientes', authenticateJWT, clientesRouter);
+app.use('/api/locations', locationRoute)
 
 // Feature Routes
 app.use('/api/qr', qrRouter); // May have public endpoints
+app.use('/api/checkin', checkinRouter); // Public - QR scanning for check-in
 app.use('/api/gps', authenticateJWT, gpsRouter);
 app.use('/api/excel', authenticateJWT, excelRouter);
 app.use('/api/dashboard', authenticateJWT, dashboardRouter);
@@ -80,4 +85,5 @@ app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  startQrScheduler();
 });

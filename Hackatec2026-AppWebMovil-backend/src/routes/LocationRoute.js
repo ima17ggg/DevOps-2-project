@@ -1,11 +1,12 @@
 // routes/locationRoute.js
 import express from "express";
 import asyncHandler from "express-async-handler";
-import { validateRequired, validateCoordinates } from "../utils/validation.js";
-import { successResponse } from "../utils/response.js";
-import * as locationService from "../services/locationService.js";
+import { validateRequired, validateCoordinates, successResponse } from "../utils/validation.js";
+import * as locationService from "../service/LocationService.js";
 
 const router = express.Router();
+
+import { authenticateJWT } from '../middleware/auth.js';
 
 router.post('/', asyncHandler(async (req, res) => {
   const { employeeId, lat, lng } = req.body;
@@ -16,7 +17,7 @@ router.post('/', asyncHandler(async (req, res) => {
   res.json(successResponse(location));
 }));
 
-router.get('/', asyncHandler(async (req, res) => {
+router.get('/', authenticateJWT, asyncHandler(async (req, res) => {
   const locations = await locationService.getLocations();
   res.json(successResponse(locations));
 }));
