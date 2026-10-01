@@ -18,12 +18,12 @@ router.post('/', asyncHandler(async (req, res) => {
   res.json(successResponse(location));
 }));
 
-router.get('/', authenticateJWT, rateLimit({
+router.get('/', rateLimit({
   windowMs: 60 * 1000,
   max: 120,
   standardHeaders: true,
   legacyHeaders: false,
-}), asyncHandler(async (req, res) => {
+}), authenticateJWT, asyncHandler(async (req, res) => {
   const locations = await locationService.getLocations();
   res.json(successResponse(locations));
 }));
