@@ -1,13 +1,9 @@
-const CHECK_INS_KEY = 'hackatec:recent-check-ins:v1'
 export const CHECK_INS_UPDATED_EVENT = 'hackatec:check-ins-updated'
+const MAX_CHECK_INS = 50
+let recentCheckIns = []
 
 function readCheckIns() {
-  try {
-    const value = JSON.parse(localStorage.getItem(CHECK_INS_KEY) ?? '[]')
-    return Array.isArray(value) ? value : []
-  } catch {
-    return []
-  }
+  return recentCheckIns
 }
 
 export function recordCheckIn(employee, photo) {
@@ -24,8 +20,8 @@ export function recordCheckIn(employee, photo) {
     status: 'verified',
     checkedInAt: now,
   }
-  const entries = [entry, ...readCheckIns()].slice(0, 50)
-  localStorage.setItem(CHECK_INS_KEY, JSON.stringify(entries))
+  const entries = [entry, ...readCheckIns()].slice(0, MAX_CHECK_INS)
+  recentCheckIns = entries
   window.dispatchEvent(new CustomEvent(CHECK_INS_UPDATED_EVENT, { detail: entries }))
   return entry
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { exportToExcel, exportToPDF } from '../services/exportHelpers'
 
 const STATUS_STYLES = {
   critica: 'bg-error-container text-on-error-container border-error',
@@ -116,6 +117,16 @@ export default function Reports() {
 
   const maxTrend = Math.max(...trend.map((item) => item.total), 1)
 
+  const handleExport = (format) => {
+    if (filteredIncidents.length === 0) return
+    const fileName = `reporte-incidencias-${new Date().toISOString().slice(0, 10)}`
+    if (format === 'excel') {
+      exportToExcel(filteredIncidents, fileName)
+      return
+    }
+    exportToPDF(filteredIncidents, fileName, 'Reporte de Incidencias')
+  }
+
   return (
     <main className="flex-1 overflow-y-auto p-gutter md:p-lg space-y-lg bg-background">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-md">
@@ -131,6 +142,22 @@ export default function Reports() {
         <div className="flex flex-wrap items-center gap-sm">
           <DateInput label="Inicio" value={startDate} onChange={setStartDate} />
           <DateInput label="Fin" value={endDate} onChange={setEndDate} />
+          <button
+            onClick={() => handleExport('pdf')}
+            disabled={filteredIncidents.length === 0}
+            className="h-11 px-md bg-surface-container text-primary border border-outline-variant font-label-md text-label-md rounded-lg hover:bg-surface-container-high transition-colors shadow-sm flex items-center gap-xs disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span translate="no" className="material-symbols-outlined notranslate text-[18px]">picture_as_pdf</span>
+            Exportar PDF
+          </button>
+          <button
+            onClick={() => handleExport('excel')}
+            disabled={filteredIncidents.length === 0}
+            className="h-11 px-md bg-surface-container text-primary border border-outline-variant font-label-md text-label-md rounded-lg hover:bg-surface-container-high transition-colors shadow-sm flex items-center gap-xs disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span translate="no" className="material-symbols-outlined notranslate text-[18px]">grid_on</span>
+            Exportar Excel
+          </button>
           <button
             onClick={() => downloadCsv(filteredIncidents)}
             disabled={filteredIncidents.length === 0}

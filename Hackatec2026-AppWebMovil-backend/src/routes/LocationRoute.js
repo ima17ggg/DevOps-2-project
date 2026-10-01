@@ -1,6 +1,7 @@
 // routes/locationRoute.js
 import express from "express";
 import asyncHandler from "express-async-handler";
+import { rateLimit } from "express-rate-limit";
 import { validateRequired, validateCoordinates, successResponse } from "../utils/validation.js";
 import * as locationService from "../service/LocationService.js";
 
@@ -17,7 +18,12 @@ router.post('/', asyncHandler(async (req, res) => {
   res.json(successResponse(location));
 }));
 
-router.get('/', authenticateJWT, asyncHandler(async (req, res) => {
+router.get('/', rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+}), authenticateJWT, asyncHandler(async (req, res) => {
   const locations = await locationService.getLocations();
   res.json(successResponse(locations));
 }));
