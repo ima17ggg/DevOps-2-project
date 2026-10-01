@@ -1,6 +1,6 @@
 const API_BASE = '/api'
-const LOCATIONS_KEY = 'gps_locations:v1'
 const SESSION_KEY = 'gps_session:v1'
+let cachedLocations = {}
 
 // ── Coordenadas del centro de la planta ─────────────────────────────────────
 export const PLANT_CENTER = { lat: 25.442251, lng: -100.993114 }
@@ -18,7 +18,7 @@ export async function sendLocation(employeeId, lat, lng) {
   } catch {
     const locations = readStoredLocations()
     locations[employeeId] = { lat, lng, updatedAt: Date.now() }
-    localStorage.setItem(LOCATIONS_KEY, JSON.stringify(locations))
+    cachedLocations = locations
   }
 }
 
@@ -71,16 +71,11 @@ export async function getAllLocations() {
       updatedAt: row.updated_at ? new Date(row.updated_at).getTime() : Date.now(),
     }
   }
+  cachedLocations = locations
   console.log('[locations] recibidas:', Object.keys(locations).length)
   return locations
 }
 
 function readStoredLocations() {
-  try {
-    const raw = localStorage.getItem(LOCATIONS_KEY)
-    const locations = raw ? JSON.parse(raw) : {}
-    return locations && typeof locations === 'object' ? locations : {}
-  } catch {
-    return {}
-  }
+  return cachedLocations && typeof cachedLocations === 'object' ? cachedLocations : {}
 }
