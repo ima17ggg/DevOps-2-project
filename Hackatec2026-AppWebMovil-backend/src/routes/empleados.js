@@ -191,7 +191,7 @@ router.post('/:id/qr/regenerar', asyncHandler(async (req, res) => {
     errorCorrectionLevel: 'M',
   });
  
-  res.json(successResponse({ qr_image, regenerated_at: new Date().toISOString() }));
+  res.json(successResponse({ qr_code: empleado.qr_code, qr_image, regenerated_at: new Date().toISOString() }));
 }));
 
 router.put('/:id', asyncHandler(async (req, res) => {

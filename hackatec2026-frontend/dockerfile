@@ -1,0 +1,14 @@
+FROM node:24-alpine
+
+WORKDIR /app
+
+# Instalar dependencias primero para aprovechar caché de Docker
+COPY package*.json ./
+RUN npm install
+
+# Copiar el resto del proyecto
+COPY . .
+
+EXPOSE 64190
+
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

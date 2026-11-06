@@ -1,9 +1,11 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import QRCode from 'qrcode';
 import { supabase } from '../utils/supabase.js';
 import { asyncHandler } from '../middleware/errors.js';
 import { authenticateJWT } from '../middleware/auth.js';
 import { validateRequired, successResponse } from '../utils/validation.js';
+import { renewEmployeeQr } from '../utils/qrScheduler.js';
 
 const router = express.Router();
 
@@ -93,10 +95,99 @@ router.post('/login', asyncHandler(async (req, res) => {
   res.cookie('auth_token', token, AUTH_COOKIE_OPTIONS);
 
   return res.json(successResponse({
+    token,
     user: {
       id_usuario: user.id_usuario,
       email: user.email,
       id_rol: user.id_rol,
+    },
+  }));
+}));
+
+// Login para la App Móvil (Expo) por ID de empleado o código externo
+router.post('/employee-login', asyncHandler(async (req, res) => {
+  const { identifier } = req.body;
+  validateRequired(req.body, ['identifier']);
+
+  const cleanId = String(identifier).trim();
+  const isNumeric = /^\d+$/.test(cleanId);
+
+  let query = supabase
+    .from('empleados')
+    .select(`
+      id_empleado,
+      nombre,
+      apellido_paterno,
+      apellido_materno,
+      id_externo,
+      qr_code,
+      Is_active,
+      roles ( nombre ),
+      plantas!empleados_id_planta_destino_fkey ( id_planta, nombre_planta, latitud, longitud, radio_metros )
+    `);
+
+  if (isNumeric) {
+    query = query.eq('id_empleado', Number(cleanId));
+  } else {
+    query = query.eq('id_externo', cleanId);
+  }
+
+  const { data: empleado, error } = await query.maybeSingle();
+
+  if (error) throw error;
+  if (!empleado) {
+    return res.status(404).json({
+      success: false,
+      error: 'Empleado no encontrado. Verifica tu ID de empleado o código externo.',
+    });
+  }
+
+  if (empleado.Is_active !== 'Activo') {
+    return res.status(403).json({
+      success: false,
+      error: 'El empleado no se encuentra activo.',
+    });
+  }
+
+  // Asegurar que tenga un QR válido del día actual
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+  let currentQr = empleado.qr_code;
+  if (!currentQr || !currentQr.endsWith(today)) {
+    const renewed = await renewEmployeeQr(empleado.id_empleado);
+    if (renewed?.qr_code) currentQr = renewed.qr_code;
+  }
+
+  const qrImage = currentQr ? await QRCode.toDataURL(currentQr, { width: 512, margin: 2 }) : null;
+  const fullName = [empleado.nombre, empleado.apellido_paterno, empleado.apellido_materno].filter(Boolean).join(' ');
+  const roleName = empleado.roles?.nombre || 'Empleado';
+
+  const token = jwt.sign(
+    {
+      id_empleado: empleado.id_empleado,
+      name: fullName,
+      role: roleName,
+    },
+    JWT_SECRET,
+    { expiresIn: '24h' }
+  );
+
+  return res.json(successResponse({
+    token,
+    employee: {
+      id_empleado: empleado.id_empleado,
+      id_externo: empleado.id_externo || `EMP-${empleado.id_empleado}`,
+      name: fullName,
+      role: roleName,
+      plant: empleado.plantas?.nombre_planta || 'Planta Central',
+      plant_coords: empleado.plantas
+        ? {
+            lat: empleado.plantas.latitud,
+            lng: empleado.plantas.longitud,
+            radius: empleado.plantas.radio_metros || 150,
+          }
+        : null,
+      qr_code: currentQr,
+      qr_image: qrImage,
     },
   }));
 }));

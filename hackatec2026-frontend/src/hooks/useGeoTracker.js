@@ -1,11 +1,9 @@
 import { useEffect, useRef } from 'react'
-import { sendLocation } from '../services/locationService'
-
-const INTERVAL_MS = 3 * 60 * 1000  // 3 minutos
+import { sendLocation, getOrCreateRtlsChannel } from '../services/locationService'
 
 /**
- * Hook que rastrea la posición GPS del empleado cada 3 minutos
- * y la envía al servidor (o localStorage en demo).
+ * Hook RTLS que rastrea la posición GPS en tiempo real continuo con watchPosition
+ * y transmite cada cambio por WebSocket al canal Phoenix (rtls:locations).
  *
  * @param {object} params
  * @param {string}  params.employeeId - ID único del empleado
@@ -14,10 +12,9 @@ const INTERVAL_MS = 3 * 60 * 1000  // 3 minutos
  * @param {boolean} params.active     - Si false, el tracking se detiene
  */
 export function useGeoTracker({ employeeId, name, role, active }) {
-  const intervalRef = useRef(null)
+  const watchIdRef = useRef(null)
 
   useEffect(() => {
-    // No rastrear si está inactivo o faltan datos
     if (!active || !employeeId) return
 
     if (!navigator.geolocation) {
@@ -25,25 +22,34 @@ export function useGeoTracker({ employeeId, name, role, active }) {
       return
     }
 
-    const readAndSend = () => {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          sendLocation(employeeId, pos.coords.latitude, pos.coords.longitude)
-        },
-        (err) => {
-          console.warn('[GeoTracker] Error al obtener posición:', err.message)
-        },
-        {
-          enableHighAccuracy: true,  // mejor precisión en móvil
-          timeout:            15000, // 15 seg máximo
-          maximumAge:         60000, // acepta caché de hasta 1 min
-        }
-      )
+    const channel = getOrCreateRtlsChannel({ employeeId, name, role })
+    if (channel.state !== 'joined' && channel.state !== 'joining') {
+      channel.join()
     }
 
-    readAndSend()                                         // lectura inmediata al activar
-    intervalRef.current = setInterval(readAndSend, INTERVAL_MS) // luego cada 3 min
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (pos) => {
+        sendLocation(employeeId, pos.coords.latitude, pos.coords.longitude, {
+          name,
+          role,
+          accuracy: pos.coords.accuracy,
+        })
+      },
+      (err) => {
+        console.warn('[GeoTracker] Error en watchPosition:', err.message)
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 2000,
+      }
+    )
 
-    return () => clearInterval(intervalRef.current)
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current)
+        watchIdRef.current = null
+      }
+    }
   }, [active, employeeId, name, role])
 }

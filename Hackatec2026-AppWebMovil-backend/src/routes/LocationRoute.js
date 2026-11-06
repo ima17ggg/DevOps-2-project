@@ -10,11 +10,17 @@ const router = express.Router();
 import { authenticateJWT } from '../middleware/auth.js';
 
 router.post('/', asyncHandler(async (req, res) => {
-  const { employeeId, lat, lng } = req.body;
-  validateRequired(req.body, ['employeeId', 'lat', 'lng']);
+  const { employeeId, id_externo, id_empleado, lat, lng, name, role, inside_geofence, nombre_planta } = req.body;
+  const resolvedId = id_externo ?? employeeId ?? id_empleado;
+  validateRequired({ employeeId: resolvedId, lat, lng }, ['employeeId', 'lat', 'lng']);
   validateCoordinates(lat, lng);
 
-  const location = await locationService.saveLocation(employeeId, lat, lng);
+  const location = await locationService.saveLocation(resolvedId, lat, lng, {
+    name,
+    role,
+    inside_geofence,
+    nombre_planta,
+  });
   res.json(successResponse(location));
 }));
 

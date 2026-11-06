@@ -1,0 +1,51 @@
+services:
+  api-express:
+    build:
+      context: ./Hackatec2026-AppWebMovil-backend
+      dockerfile: Dockerfile
+    container_name: rtls-api-express
+    ports:
+      - "3000:3000"
+    env_file: .env
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+    volumes:
+      - ./Hackatec2026-AppWebMovil-backend/src:/app/src
+    restart: unless-stopped
+
+  rtls-phoenix:
+    build:
+      context: ./rtls-phoenix
+      dockerfile: Dockerfile
+    container_name: rtls-phoenix-ws
+    ports:
+      - "4000:4000"
+    env_file: .env
+    environment:
+      - MIX_ENV=dev
+      - PORT=4000
+    volumes:
+      - ./rtls-phoenix/lib:/app/lib
+      - ./rtls-phoenix/config:/app/config
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./hackatec2026-frontend
+      dockerfile: dockerfile
+    container_name: rtls-frontend
+    ports:
+      - "64190:64190"
+    environment:
+      - VITE_API_URL=http://api-express:3000
+      - VITE_RTLS_HTTP_URL=http://rtls-phoenix:4000
+      - VITE_RTLS_WS_URL=ws://rtls-phoenix:4000
+    volumes:
+      - ./hackatec2026-frontend/src:/app/src
+      - ./hackatec2026-frontend/index.html:/app/index.html
+      - ./hackatec2026-frontend/vite.config.js:/app/vite.config.js
+    depends_on:
+      - api-express
+      - rtls-phoenix
+    restart: unless-stopped

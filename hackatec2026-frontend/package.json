@@ -11,12 +11,16 @@
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.9",
     "jsqr": "^1.4.0",
     "leaflet": "^1.9.4",
+    "phoenix": "^1.7.14",
     "qrcode": "^1.5.4",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-router-dom": "^7.9.4"
+    "react-router-dom": "^7.9.4",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
